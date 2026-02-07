@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/check-alerts",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/scrape-dates",
+      "schedule": "0 2 * * 0"
+    },
+    {
+      "path": "/api/cron/check-expirations",
+      "schedule": "0 1 * * *"
+    }
+  ]
+}
