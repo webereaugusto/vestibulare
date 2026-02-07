@@ -187,23 +187,29 @@ async function sendWhatsAppAlert({
     return { success: false, error: 'Usuário sem telefone cadastrado' };
   }
 
-  // Brevo WhatsApp usa a API de campanhas/transacional
-  // Aqui usa-se email como fallback, configurando no Brevo o template de WhatsApp
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
-  sendSmtpEmail.to = [{ email: user.email }];
-  sendSmtpEmail.sender = getSender();
-  sendSmtpEmail.subject = `WhatsApp Alert: ${vestibular.name}`;
-  sendSmtpEmail.params = {
-    PHONE: user.phone,
-    VESTIBULAR: vestibular.name,
-    EVENT: importantDate.event_name,
-    DATE: formattedDate,
-    URGENCY: urgencyText,
-  };
-  // Usar templateId configurado no Brevo para WhatsApp
-  sendSmtpEmail.templateId = 2;
+  // Usa Evolution API para envio de WhatsApp
+  const { sendTextMessage, buildAlertMessage, isEvolutionReady } = await import('@/lib/evolution');
 
-  await apiInstance.sendTransacEmail(sendSmtpEmail);
+  const ready = await isEvolutionReady();
+  if (!ready) {
+    return { success: false, error: 'Evolution API não está conectada. Configure em Admin > WhatsApp.' };
+  }
+
+  const message = buildAlertMessage({
+    userName: user.full_name || 'estudante',
+    vestibularName: vestibular.name,
+    eventName: importantDate.event_name,
+    formattedDate,
+    urgencyText,
+    officialUrl: vestibular.official_url || undefined,
+  });
+
+  const result = await sendTextMessage(user.phone, message);
+
+  if (!result.success) {
+    return { success: false, error: result.error || 'Falha ao enviar WhatsApp via Evolution' };
+  }
+
   return { success: true };
 }
 

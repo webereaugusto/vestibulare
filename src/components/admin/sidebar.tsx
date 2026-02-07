@@ -14,6 +14,7 @@ import {
   X,
   ArrowLeft,
   Mail,
+  MessageSquare,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,7 @@ const navItems = [
   { href: '/admin/logs', icon: Activity, label: 'Logs de Alertas' },
   { href: '/admin/scraper', icon: Bot, label: 'Scraper' },
   { href: '/admin/test-email', icon: Mail, label: 'Teste de Email' },
+  { href: '/admin/evolution', icon: MessageSquare, label: 'WhatsApp' },
 ];
 
 interface AdminSidebarProps {
