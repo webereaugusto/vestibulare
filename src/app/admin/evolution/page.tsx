@@ -429,16 +429,16 @@ EVOLUTION_INSTANCE_NAME=vestibulare`}
         <CardContent>
           <div className="space-y-3">
             {[
-              { key: 'EVOLUTION_API_URL', desc: 'URL da Evolution API', example: 'http://localhost:8080', configured: !!process.env.NEXT_PUBLIC_EVOLUTION_CONFIGURED },
-              { key: 'EVOLUTION_API_KEY', desc: 'Chave de API da Evolution', example: 'sua-api-key-aqui' },
-              { key: 'EVOLUTION_INSTANCE_NAME', desc: 'Nome da instância (padrão: vestibulare)', example: 'vestibulare' },
+              { key: 'EVOLUTION_API_URL', desc: 'URL da Evolution API', value: instanceInfo ? '✅ Configurada' : 'Não configurada' },
+              { key: 'EVOLUTION_API_KEY', desc: 'Chave de API da Evolution', value: instanceInfo ? '✅ Configurada' : 'Não configurada' },
+              { key: 'EVOLUTION_INSTANCE_NAME', desc: 'Nome da instância', value: instanceInfo?.instanceName || 'Não configurada' },
             ].map((envVar) => (
               <div key={envVar.key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <code className="text-sm font-mono font-medium text-gray-900">{envVar.key}</code>
                   <p className="text-xs text-gray-500 mt-0.5">{envVar.desc}</p>
                 </div>
-                <Badge variant="secondary" className="font-mono text-xs">{envVar.example}</Badge>
+                <Badge variant={envVar.value.includes('✅') || envVar.value === instanceInfo?.instanceName ? 'success' : 'secondary'} className="font-mono text-xs">{envVar.value}</Badge>
               </div>
             ))}
           </div>

@@ -85,7 +85,12 @@ export async function getConnectionState(instanceName?: string): Promise<{
   instance: string;
 }> {
   const name = instanceName || getInstanceName();
-  return request(`/instance/connectionState/${name}`, { method: 'GET' });
+  const data = await request(`/instance/connectionState/${name}`, { method: 'GET' });
+  // Evolution API retorna { instance: { instanceName, state } }
+  return {
+    state: data?.instance?.state || data?.state || 'unknown',
+    instance: data?.instance?.instanceName || name,
+  };
 }
 
 /**
@@ -95,14 +100,17 @@ export async function fetchInstanceInfo(instanceName?: string): Promise<Instance
   const name = instanceName || getInstanceName();
   try {
     const data = await request(`/instance/fetchInstances?instanceName=${name}`, { method: 'GET' });
-    if (Array.isArray(data) && data.length > 0) {
-      const inst = data[0];
+    // Evolution API v2 retorna { value: [...], Count: N }
+    // Evolution API v1 retorna array direto [...]
+    const instances = Array.isArray(data) ? data : data?.value || [];
+    if (instances.length > 0) {
+      const inst = instances[0];
       return {
-        instanceName: inst.instance?.instanceName || name,
-        state: inst.instance?.state || 'unknown',
-        profileName: inst.instance?.profileName,
-        profilePictureUrl: inst.instance?.profilePicUrl,
-        number: inst.instance?.owner,
+        instanceName: inst.name || inst.instance?.instanceName || name,
+        state: inst.connectionStatus || inst.instance?.state || 'unknown',
+        profileName: inst.profileName || inst.instance?.profileName || undefined,
+        profilePictureUrl: inst.profilePicUrl || inst.instance?.profilePicUrl || undefined,
+        number: inst.number || inst.ownerJid?.replace('@s.whatsapp.net', '') || inst.instance?.owner || undefined,
       };
     }
     return null;
