@@ -47,6 +47,15 @@ export default function AdminDatesPage() {
   const [filterEventType, setFilterEventType] = useState('');
   const [broadcastTarget, setBroadcastTarget] = useState<(ImportantDate & { vestibular: Vestibular }) | null>(null);
   const [broadcasting, setBroadcasting] = useState(false);
+  const [broadcastResult, setBroadcastResult] = useState<{
+    success: boolean;
+    message?: string;
+    sent?: number;
+    failed?: number;
+    skipped?: number;
+    errors?: string[];
+    error?: string;
+  } | null>(null);
   const { addToast } = useToast();
   const supabase = createBrowserClient();
 
@@ -151,6 +160,7 @@ export default function AdminDatesPage() {
   async function handleBroadcast() {
     if (!broadcastTarget) return;
     setBroadcasting(true);
+    setBroadcastResult(null);
     try {
       const res = await fetch('/api/admin/broadcast-alert', {
         method: 'POST',
@@ -158,16 +168,18 @@ export default function AdminDatesPage() {
         body: JSON.stringify({ importantDateId: broadcastTarget.id }),
       });
       const data = await res.json();
-      if (data.success) {
-        addToast(data.message || 'Disparo realizado!', 'success');
-      } else {
-        addToast(data.error || 'Erro no disparo.', 'error');
-      }
+      setBroadcastResult(data);
     } catch {
-      addToast('Erro ao disparar alertas.', 'error');
+      setBroadcastResult({ success: false, error: 'Erro de rede ao disparar alertas.' });
     } finally {
       setBroadcasting(false);
+    }
+  }
+
+  function closeBroadcastModal() {
+    if (!broadcasting) {
       setBroadcastTarget(null);
+      setBroadcastResult(null);
     }
   }
 
@@ -340,9 +352,9 @@ export default function AdminDatesPage() {
         )}
       </div>
 
-      {/* Modal de confirmação de disparo */}
-      <Modal open={!!broadcastTarget} onClose={() => !broadcasting && setBroadcastTarget(null)} title="Confirmar Disparo de Alerta">
-        {broadcastTarget && (
+      {/* Modal de confirmação e resultado de disparo */}
+      <Modal open={!!broadcastTarget} onClose={closeBroadcastModal} title={broadcastResult ? 'Resultado do Disparo' : 'Confirmar Disparo de Alerta'}>
+        {broadcastTarget && !broadcastResult && (
           <div className="space-y-4">
             <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
               <p className="text-sm text-amber-800">
@@ -350,11 +362,11 @@ export default function AdminDatesPage() {
                 o vestibular <strong>&quot;{(broadcastTarget.vestibular as Vestibular)?.name}&quot;</strong> agora?
               </p>
               <p className="text-xs text-amber-600 mt-2">
-                Todos os usuários inscritos neste vestibular receberão o alerta imediatamente nos canais configurados (email, SMS, WhatsApp).
+                Todos os usuarios inscritos neste vestibular receberao o alerta imediatamente nos canais configurados (email, SMS, WhatsApp).
               </p>
             </div>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setBroadcastTarget(null)} disabled={broadcasting}>
+              <Button variant="outline" onClick={closeBroadcastModal} disabled={broadcasting}>
                 Cancelar
               </Button>
               <Button onClick={handleBroadcast} loading={broadcasting}>
@@ -364,6 +376,78 @@ export default function AdminDatesPage() {
                   <><Send className="h-4 w-4 mr-2" /> Sim, Enviar Agora</>
                 )}
               </Button>
+            </div>
+          </div>
+        )}
+
+        {broadcastResult && (
+          <div className="space-y-4">
+            {/* Resumo */}
+            <div className={`p-4 rounded-lg border ${
+              broadcastResult.sent && broadcastResult.sent > 0
+                ? 'bg-emerald-50 border-emerald-200'
+                : broadcastResult.error
+                  ? 'bg-red-50 border-red-200'
+                  : 'bg-amber-50 border-amber-200'
+            }`}>
+              <p className={`text-sm font-medium ${
+                broadcastResult.sent && broadcastResult.sent > 0
+                  ? 'text-emerald-800'
+                  : broadcastResult.error
+                    ? 'text-red-800'
+                    : 'text-amber-800'
+              }`}>
+                {broadcastResult.error
+                  ? `Erro: ${broadcastResult.error}`
+                  : broadcastResult.message
+                }
+              </p>
+            </div>
+
+            {/* Contadores detalhados */}
+            {broadcastResult.success && (
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center p-3 bg-emerald-50 rounded-lg">
+                  <p className="text-2xl font-bold text-emerald-700">{broadcastResult.sent ?? 0}</p>
+                  <p className="text-xs text-emerald-600">Enviados</p>
+                </div>
+                <div className="text-center p-3 bg-red-50 rounded-lg">
+                  <p className="text-2xl font-bold text-red-700">{broadcastResult.failed ?? 0}</p>
+                  <p className="text-xs text-red-600">Falhas</p>
+                </div>
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <p className="text-2xl font-bold text-gray-700">{broadcastResult.skipped ?? 0}</p>
+                  <p className="text-xs text-gray-600">Ignorados</p>
+                </div>
+              </div>
+            )}
+
+            {/* Dica quando ninguém inscrito */}
+            {broadcastResult.success && broadcastResult.sent === 0 && broadcastResult.failed === 0 && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-800 font-medium mb-1">Por que ninguem recebeu?</p>
+                <ul className="text-xs text-blue-700 list-disc pl-4 space-y-0.5">
+                  <li>Nenhum usuario criou um alerta para este vestibular no Dashboard</li>
+                  <li>Para testar: acesse o Dashboard como usuario e crie um alerta para o vestibular desejado</li>
+                  <li>O usuario precisa ter o vestibular adicionado em &quot;Meus Alertas&quot;</li>
+                </ul>
+              </div>
+            )}
+
+            {/* Erros detalhados */}
+            {broadcastResult.errors && broadcastResult.errors.length > 0 && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-xs text-red-800 font-medium mb-1">Detalhes dos erros:</p>
+                <ul className="text-xs text-red-700 list-disc pl-4 space-y-0.5">
+                  {broadcastResult.errors.map((err, i) => (
+                    <li key={i}>{err}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <Button onClick={closeBroadcastModal}>Fechar</Button>
             </div>
           </div>
         )}

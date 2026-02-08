@@ -54,7 +54,8 @@ export async function POST(req: Request) {
     if (!userAlerts || userAlerts.length === 0) {
       return NextResponse.json({
         success: true,
-        message: 'Nenhum usuário inscrito neste vestibular',
+        message: `Nenhum usuário tem alertas ativos para "${vestibular.name}"`,
+        totalSubscribers: 0,
         sent: 0,
         failed: 0,
         skipped: 0,
@@ -124,7 +125,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Disparo concluído: ${totalSent} enviados, ${totalFailed} falhas, ${totalSkipped} ignorados`,
+      message: `Disparo concluído: ${totalSent} enviados, ${totalFailed} falhas, ${totalSkipped} ignorados (${userAlerts.length} inscritos encontrados)`,
+      totalSubscribers: userAlerts.length,
       sent: totalSent,
       failed: totalFailed,
       skipped: totalSkipped,
