@@ -36,6 +36,8 @@ export interface ImportantDate {
   event_name: string;
   event_date: string;
   event_end_date: string | null;
+  official_url: string | null;
+  notes: string | null;
   alert_days_before: number[];
   source: DateSource;
   scraped_at: string | null;
@@ -50,6 +52,7 @@ export interface UserAlert {
   user_id: string;
   vestibular_id: string;
   channels: AlertChannel[];
+  event_types: EventType[] | null; // null = todos os tipos
   active: boolean;
   created_at: string;
   updated_at: string;

@@ -62,6 +62,12 @@ export async function GET(req: Request) {
         const profile = (alert as UserAlert & { profile: Profile }).profile;
         if (!profile) continue;
 
+        // Verificar se o tipo de evento é aceito pelo alerta do usuário
+        const alertEventTypes = alert.event_types as string[] | null;
+        if (alertEventTypes && alertEventTypes.length > 0) {
+          if (!alertEventTypes.includes(dateRecord.event_type)) continue;
+        }
+
         // Verificar se plano está ativo
         const plan = PLANS[profile.plan_type];
         if (!plan) continue;

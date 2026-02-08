@@ -37,6 +37,8 @@ create table if not exists important_dates (
   event_name text not null,
   event_date date not null,
   event_end_date date, -- Para períodos (ex: inscrição de X a Y)
+  official_url text, -- Link oficial do evento
+  notes text, -- Texto adicional / observações
   alert_days_before integer[] default '{1, 3, 7}',
   source text default 'manual' check (source in ('manual', 'scraped')),
   scraped_at timestamp with time zone,
@@ -50,6 +52,7 @@ create table if not exists user_alerts (
   user_id uuid references profiles(id) on delete cascade,
   vestibular_id uuid references vestibulares(id) on delete cascade,
   channels text[] default '{"email"}',
+  event_types text[] default null, -- NULL = todos os tipos; array = tipos selecionados
   active boolean default true,
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now(),

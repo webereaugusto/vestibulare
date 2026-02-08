@@ -1,24 +1,37 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Bell, Plus, Trash2, Check } from 'lucide-react';
+import { Bell, Plus, Trash2, Check, Pencil, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { createBrowserClient } from '@/lib/supabase';
 import { PLANS } from '@/lib/plans';
-import { Vestibular, UserAlert, Profile, AlertChannel } from '@/types/database';
-import { formatChannel } from '@/lib/utils';
+import { Vestibular, UserAlert, Profile, AlertChannel, EventType } from '@/types/database';
+import { formatChannel, formatEventType } from '@/lib/utils';
+
+const ALL_EVENT_TYPES: { value: EventType; label: string }[] = [
+  { value: 'inscricao', label: 'Inscrição' },
+  { value: 'prova', label: 'Prova' },
+  { value: 'resultado', label: 'Resultado' },
+  { value: 'segunda_chamada', label: 'Segunda Chamada' },
+  { value: 'recurso', label: 'Recurso' },
+  { value: 'matricula', label: 'Matrícula' },
+  { value: 'outro', label: 'Outro' },
+];
 
 export default function AlertsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [vestibulares, setVestibulares] = useState<Vestibular[]>([]);
   const [userAlerts, setUserAlerts] = useState<(UserAlert & { vestibular: Vestibular })[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [editingAlert, setEditingAlert] = useState<(UserAlert & { vestibular: Vestibular }) | null>(null);
   const [selectedVestibular, setSelectedVestibular] = useState<string>('');
   const [selectedChannels, setSelectedChannels] = useState<AlertChannel[]>(['email']);
+  const [allEventTypes, setAllEventTypes] = useState(true);
+  const [selectedEventTypes, setSelectedEventTypes] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { addToast } = useToast();
@@ -50,41 +63,99 @@ export default function AlertsPage() {
     setLoading(false);
   }
 
-  async function handleCreateAlert() {
-    if (!profile || !selectedVestibular) return;
+  function openCreate() {
+    setEditingAlert(null);
+    setSelectedVestibular('');
+    setSelectedChannels(['email']);
+    setAllEventTypes(true);
+    setSelectedEventTypes([]);
+    setShowModal(true);
+  }
+
+  function openEdit(alert: UserAlert & { vestibular: Vestibular }) {
+    setEditingAlert(alert);
+    setSelectedVestibular(alert.vestibular_id);
+    setSelectedChannels(alert.channels || ['email']);
+    if (!Array.isArray(alert.event_types) || alert.event_types.length === 0) {
+      setAllEventTypes(true);
+      setSelectedEventTypes([]);
+    } else {
+      setAllEventTypes(false);
+      setSelectedEventTypes(alert.event_types);
+    }
+    setShowModal(true);
+  }
+
+  async function handleSaveAlert() {
+    if (!profile) return;
+    if (!editingAlert && !selectedVestibular) return;
     setSaving(true);
 
     const plan = PLANS[profile.plan_type];
-    const activeAlerts = userAlerts.filter((a) => a.active);
 
-    if (activeAlerts.length >= plan.maxVestibulares) {
-      addToast(`Limite de ${plan.maxVestibulares} vestibulares atingido. Faça upgrade do plano.`, 'error');
-      setSaving(false);
-      return;
+    // Se criando novo, verificar limite
+    if (!editingAlert) {
+      const activeAlerts = userAlerts.filter((a) => a.active);
+      if (activeAlerts.length >= plan.maxVestibulares) {
+        addToast(`Limite de ${plan.maxVestibulares} vestibulares atingido. Faça upgrade do plano.`, 'error');
+        setSaving(false);
+        return;
+      }
     }
 
     // Filtrar canais permitidos pelo plano
     const allowedChannels = selectedChannels.filter((c) => plan.channels.includes(c));
+    if (allowedChannels.length === 0) {
+      addToast('Selecione pelo menos um canal de alerta.', 'error');
+      setSaving(false);
+      return;
+    }
 
-    const { error } = await supabase.from('user_alerts').insert({
-      user_id: profile.id,
-      vestibular_id: selectedVestibular,
-      channels: allowedChannels,
-      active: true,
-    });
+    // Event types: null = todos, array = específicos
+    const eventTypes = allEventTypes ? null : (selectedEventTypes.length > 0 ? selectedEventTypes : null);
 
-    if (error) {
-      if (error.code === '23505') {
-        addToast('Você já tem um alerta para este vestibular.', 'error');
+    if (editingAlert) {
+      // Atualizar alerta existente
+      const { error } = await supabase
+        .from('user_alerts')
+        .update({
+          channels: allowedChannels,
+          event_types: eventTypes,
+        })
+        .eq('id', editingAlert.id);
+
+      if (error) {
+        addToast('Erro ao atualizar alerta.', 'error');
       } else {
-        addToast('Erro ao criar alerta. Tente novamente.', 'error');
+        addToast('Alerta atualizado com sucesso!', 'success');
+        setShowModal(false);
+        await loadData();
       }
     } else {
-      addToast('Alerta criado com sucesso!', 'success');
-      setShowModal(false);
-      setSelectedVestibular('');
-      setSelectedChannels(['email']);
-      await loadData();
+      // Criar novo alerta
+      const { error } = await supabase.from('user_alerts').insert({
+        user_id: profile.id,
+        vestibular_id: selectedVestibular,
+        channels: allowedChannels,
+        event_types: eventTypes,
+        active: true,
+      });
+
+      if (error) {
+        if (error.code === '23505') {
+          addToast('Você já tem um alerta para este vestibular.', 'error');
+        } else {
+          addToast('Erro ao criar alerta. Tente novamente.', 'error');
+        }
+      } else {
+        addToast('Alerta criado com sucesso!', 'success');
+        setShowModal(false);
+        setSelectedVestibular('');
+        setSelectedChannels(['email']);
+        setAllEventTypes(true);
+        setSelectedEventTypes([]);
+        await loadData();
+      }
     }
     setSaving(false);
   }
@@ -119,6 +190,12 @@ export default function AlertsPage() {
     );
   }
 
+  function toggleEventType(type: EventType) {
+    setSelectedEventTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -141,7 +218,7 @@ export default function AlertsPage() {
             {userAlerts.filter((a) => a.active).length} de {plan.maxVestibulares} vestibulares
           </p>
         </div>
-        <Button onClick={() => setShowModal(true)} disabled={availableVestibulares.length === 0}>
+        <Button onClick={openCreate} disabled={availableVestibulares.length === 0}>
           <Plus className="h-4 w-4 mr-2" /> Novo Alerta
         </Button>
       </div>
@@ -149,49 +226,76 @@ export default function AlertsPage() {
       {/* Lista de alertas */}
       {userAlerts.length > 0 ? (
         <div className="grid gap-4">
-          {userAlerts.map((alert) => (
-            <Card key={alert.id} className={!alert.active ? 'opacity-60' : ''}>
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 min-w-0 flex-1">
-                    <div className="p-2 rounded-lg bg-indigo-50 flex-shrink-0">
-                      <Bell className={`h-5 w-5 ${alert.active ? 'text-indigo-600' : 'text-gray-400'}`} />
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">
-                        {alert.vestibular?.name}
-                      </h3>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {alert.channels.map((ch) => (
-                          <Badge key={ch} variant="secondary" className="text-xs">
-                            {formatChannel(ch)}
-                          </Badge>
-                        ))}
+          {userAlerts.map((alert) => {
+            const hasCustomTypes = Array.isArray(alert.event_types) && alert.event_types.length > 0;
+            return (
+              <Card key={alert.id} className={!alert.active ? 'opacity-60' : ''}>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className="p-2 rounded-lg bg-indigo-50 flex-shrink-0">
+                        <Bell className={`h-5 w-5 ${alert.active ? 'text-indigo-600' : 'text-gray-400'}`} />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-gray-900 truncate">
+                          {alert.vestibular?.name}
+                        </h3>
+                        {/* Canais */}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {alert.channels.map((ch) => (
+                            <Badge key={ch} variant="secondary" className="text-xs">
+                              {formatChannel(ch)}
+                            </Badge>
+                          ))}
+                        </div>
+                        {/* Tipos de evento */}
+                        <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                          {hasCustomTypes ? (
+                            <>
+                              <Filter className="h-3 w-3 text-gray-400 mr-0.5" />
+                              {alert.event_types!.map((et) => (
+                                <Badge key={et} variant="default" className="text-xs">
+                                  {formatEventType(et)}
+                                </Badge>
+                              ))}
+                            </>
+                          ) : (
+                            <span className="text-xs text-gray-500">Todos os tipos de alerta</span>
+                          )}
+                        </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEdit(alert)}
+                        title="Editar"
+                      >
+                        <Pencil className="h-4 w-4 text-gray-500" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleToggleAlert(alert.id, alert.active)}
+                        title={alert.active ? 'Desativar' : 'Ativar'}
+                      >
+                        <Check className={`h-4 w-4 ${alert.active ? 'text-emerald-600' : 'text-gray-400'}`} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteAlert(alert.id)}
+                        title="Remover"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleToggleAlert(alert.id, alert.active)}
-                      title={alert.active ? 'Desativar' : 'Ativar'}
-                    >
-                      <Check className={`h-4 w-4 ${alert.active ? 'text-emerald-600' : 'text-gray-400'}`} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteAlert(alert.id)}
-                      title="Remover"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       ) : (
         <Card>
@@ -199,32 +303,47 @@ export default function AlertsPage() {
             <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum alerta configurado</h3>
             <p className="text-gray-500 mb-4">Adicione vestibulares para receber alertas automáticos.</p>
-            <Button onClick={() => setShowModal(true)}>
+            <Button onClick={openCreate}>
               <Plus className="h-4 w-4 mr-2" /> Adicionar Vestibular
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Modal de criar alerta */}
-      <Modal open={showModal} onClose={() => setShowModal(false)} title="Novo Alerta">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Vestibular</label>
-            <select
-              value={selectedVestibular}
-              onChange={(e) => setSelectedVestibular(e.target.value)}
-              className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-            >
-              <option value="">Selecione um vestibular...</option>
-              {availableVestibulares.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.name}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* Modal de criar/editar alerta */}
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingAlert ? 'Editar Alerta' : 'Novo Alerta'}
+      >
+        <div className="space-y-5">
+          {/* Vestibular */}
+          {!editingAlert ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Vestibular</label>
+              <select
+                value={selectedVestibular}
+                onChange={(e) => setSelectedVestibular(e.target.value)}
+                className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+                <option value="">Selecione um vestibular...</option>
+                {availableVestibulares.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Vestibular</label>
+              <div className="h-10 flex items-center px-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
+                {editingAlert.vestibular?.name}
+              </div>
+            </div>
+          )}
 
+          {/* Canais de alerta */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Canais de alerta</label>
             <div className="flex flex-wrap gap-2">
@@ -252,16 +371,92 @@ export default function AlertsPage() {
             </div>
           </div>
 
+          {/* Tipos de alerta */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Tipos de alerta
+            </label>
+
+            {/* Toggle todos / selecionar */}
+            <div className="flex gap-2 mb-3">
+              <button
+                onClick={() => {
+                  setAllEventTypes(true);
+                  setSelectedEventTypes([]);
+                }}
+                className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                  allEventTypes
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Todos os alertas
+              </button>
+              <button
+                onClick={() => setAllEventTypes(false)}
+                className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                  !allEventTypes
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Selecionar tipos
+              </button>
+            </div>
+
+            {/* Grid de tipos de evento */}
+            {!allEventTypes && (
+              <div className="grid grid-cols-2 gap-2">
+                {ALL_EVENT_TYPES.map((type) => {
+                  const isSelected = selectedEventTypes.includes(type.value);
+                  return (
+                    <button
+                      key={type.value}
+                      onClick={() => toggleEventType(type.value)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors text-left ${
+                        isSelected
+                          ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                          : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                          isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300'
+                        }`}>
+                          {isSelected && (
+                            <Check className="h-3 w-3 text-white" />
+                          )}
+                        </span>
+                        {type.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {!allEventTypes && selectedEventTypes.length === 0 && (
+              <p className="text-xs text-amber-600 mt-2">
+                Selecione pelo menos um tipo ou escolha &quot;Todos os alertas&quot;.
+              </p>
+            )}
+          </div>
+
+          {/* Botões */}
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="outline" onClick={() => setShowModal(false)}>
               Cancelar
             </Button>
             <Button
-              onClick={handleCreateAlert}
+              onClick={handleSaveAlert}
               loading={saving}
-              disabled={!selectedVestibular || selectedChannels.length === 0}
+              disabled={
+                (!editingAlert && !selectedVestibular) ||
+                selectedChannels.length === 0 ||
+                (!allEventTypes && selectedEventTypes.length === 0)
+              }
             >
-              Criar Alerta
+              {editingAlert ? 'Salvar' : 'Criar Alerta'}
             </Button>
           </div>
         </div>
