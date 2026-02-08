@@ -253,7 +253,7 @@ export default function HomePage() {
                         </li>
                       ))}
                     </ul>
-                    <Link href="/auth/signup" className="block">
+                    <Link href={plan.price === 0 ? '/auth/signup' : `/auth/signup?plan=${key}`} className="block">
                       <Button
                         className="w-full"
                         variant={plan.popular ? 'default' : 'outline'}

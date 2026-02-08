@@ -1,15 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { GraduationCap } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { GraduationCap, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { createBrowserClient } from '@/lib/supabase';
+import { PLANS, formatPrice } from '@/lib/plans';
+import { PlanType } from '@/types/database';
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const selectedPlan = searchParams.get('plan') as PlanType | null;
+  const isPaidPlan = selectedPlan === 'basic' || selectedPlan === 'premium';
+  const planInfo = isPaidPlan ? PLANS[selectedPlan] : null;
+
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +37,7 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [redirectingToPayment, setRedirectingToPayment] = useState(false);
   const router = useRouter();
   const supabase = createBrowserClient();
 
@@ -63,6 +84,25 @@ export default function SignupPage() {
             .from('profiles')
             .update({ phone, full_name: fullName })
             .eq('id', data.user.id);
+        }
+
+        // Se plano pago selecionado, redirecionar para pagamento
+        if (isPaidPlan) {
+          setRedirectingToPayment(true);
+          try {
+            const response = await fetch('/api/payments/create-preference', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ planType: selectedPlan }),
+            });
+            const paymentData = await response.json();
+            if (paymentData.init_point) {
+              window.location.href = paymentData.init_point;
+              return;
+            }
+          } catch {
+            // Se falhar o pagamento, vai para o dashboard normalmente
+          }
         }
 
         router.push('/dashboard');
@@ -126,11 +166,30 @@ export default function SignupPage() {
           </Link>
         </div>
 
+        {/* Banner do plano selecionado */}
+        {isPaidPlan && planInfo && (
+          <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Zap className="h-5 w-5" />
+              <span className="font-semibold text-lg">Plano {planInfo.name}</span>
+            </div>
+            <p className="text-indigo-100 text-sm">
+              {formatPrice(planInfo.price)}/ano - {planInfo.features[0]}
+            </p>
+            <p className="text-indigo-200 text-xs mt-1">
+              Crie sua conta e vá direto para o pagamento
+            </p>
+          </div>
+        )}
+
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Criar Conta</CardTitle>
             <CardDescription>
-              Comece a receber alertas sobre vestibulares gratuitamente
+              {isPaidPlan
+                ? `Preencha seus dados para assinar o plano ${planInfo?.name}`
+                : 'Comece a receber alertas sobre vestibulares gratuitamente'
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -181,8 +240,13 @@ export default function SignupPage() {
                 minLength={6}
               />
 
-              <Button type="submit" className="w-full" loading={loading}>
-                Criar Conta Grátis
+              <Button type="submit" className="w-full" loading={loading || redirectingToPayment}>
+                {redirectingToPayment
+                  ? 'Redirecionando para pagamento...'
+                  : isPaidPlan
+                    ? `Criar Conta e Assinar ${planInfo?.name}`
+                    : 'Criar Conta Grátis'
+                }
               </Button>
             </form>
 
@@ -199,6 +263,14 @@ export default function SignupPage() {
                 Entrar
               </Link>
             </div>
+
+            {isPaidPlan && (
+              <div className="mt-3 text-center text-xs text-gray-500">
+                <Link href="/auth/signup" className="hover:underline">
+                  Ou comece com o plano gratuito
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
