@@ -16,6 +16,7 @@ import {
   Mail,
   MessageSquare,
   Smartphone,
+  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/admin/users', icon: Users, label: 'Usuarios' },
   { href: '/admin/vestibulares', icon: BookOpen, label: 'Vestibulares' },
   { href: '/admin/dates', icon: Calendar, label: 'Datas Importantes' },
   { href: '/admin/logs', icon: Activity, label: 'Logs de Alertas' },
