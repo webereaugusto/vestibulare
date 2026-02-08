@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Bell, Plus, Trash2, Check, Pencil, Filter } from 'lucide-react';
+import { Bell, Plus, Trash2, Check, Pencil, Filter, Zap, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 import { Modal } from '@/components/ui/modal';
 import { useToast } from '@/components/ui/toast';
 import { createBrowserClient } from '@/lib/supabase';
@@ -205,23 +206,89 @@ export default function AlertsPage() {
   }
 
   const plan = profile ? PLANS[profile.plan_type] : PLANS.free;
+  const planType = profile?.plan_type || 'free';
+  const activeCount = userAlerts.filter((a) => a.active).length;
+  const usagePercent = Math.min((activeCount / plan.maxVestibulares) * 100, 100);
+  const isAtLimit = activeCount >= plan.maxVestibulares;
+  const canUpgrade = planType !== 'premium';
   const availableVestibulares = vestibulares.filter(
     (v) => !userAlerts.some((a) => a.vestibular_id === v.id)
   );
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Meus Alertas</h1>
-          <p className="text-gray-500 mt-1">
-            {userAlerts.filter((a) => a.active).length} de {plan.maxVestibulares} vestibulares
-          </p>
-        </div>
-        <Button onClick={openCreate} disabled={availableVestibulares.length === 0}>
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h1 className="text-2xl font-bold text-gray-900">Meus Alertas</h1>
+        <Button onClick={openCreate} disabled={availableVestibulares.length === 0 || isAtLimit}>
           <Plus className="h-4 w-4 mr-2" /> Novo Alerta
         </Button>
       </div>
+
+      {/* Banner do Plano */}
+      <Card className={planType === 'free' ? 'border-gray-200' : planType === 'basic' ? 'border-indigo-200' : 'border-amber-200'}>
+        <CardContent className="p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge
+                  variant={planType === 'free' ? 'secondary' : planType === 'basic' ? 'default' : 'warning'}
+                  className="text-xs font-semibold"
+                >
+                  Plano {plan.name}
+                </Badge>
+                <span className="text-sm text-gray-500">
+                  {plan.channels.map((c) => formatChannel(c)).join(', ')}
+                </span>
+              </div>
+
+              {/* Barra de uso */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-gray-700">
+                      {activeCount} de {plan.maxVestibulares} vestibulares
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {plan.maxVestibulares - activeCount} disponíveis
+                    </span>
+                  </div>
+                  <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        isAtLimit
+                          ? 'bg-red-500'
+                          : usagePercent >= 70
+                            ? 'bg-amber-500'
+                            : 'bg-indigo-600'
+                      }`}
+                      style={{ width: `${usagePercent}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {isAtLimit && (
+                <p className="text-xs text-red-600 mt-1.5 font-medium">
+                  Você atingiu o limite do seu plano.
+                  {canUpgrade && ' Faça upgrade para adicionar mais vestibulares.'}
+                </p>
+              )}
+            </div>
+
+            {/* CTA Upgrade */}
+            {canUpgrade && (
+              <Link href="/dashboard/upgrade" className="flex-shrink-0">
+                <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all">
+                  <Zap className="h-4 w-4" />
+                  Fazer Upgrade
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </Link>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Lista de alertas */}
       {userAlerts.length > 0 ? (
@@ -324,7 +391,7 @@ export default function AlertsPage() {
               <select
                 value={selectedVestibular}
                 onChange={(e) => setSelectedVestibular(e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-sans focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               >
                 <option value="">Selecione um vestibular...</option>
                 {availableVestibulares.map((v) => (

@@ -2,7 +2,7 @@ import { getProfile, createSupabaseServer } from '@/lib/supabase-server';
 import { Profile } from '@/types/database';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Calendar, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Bell, Calendar, CheckCircle, AlertTriangle, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getDaysUntil, formatEventType, formatChannel, formatStatus } from '@/lib/utils';
@@ -42,13 +42,20 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Olá, {profile.full_name || 'estudante'}!
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Aqui está um resumo dos seus alertas de vestibulares.
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Olá, {profile.full_name || 'estudante'}!
+          </h1>
+          <p className="text-gray-500 mt-1">
+            Aqui está um resumo dos seus alertas de vestibulares.
+          </p>
+        </div>
+        <Link href="/dashboard/alerts">
+          <Button>
+            <Plus className="h-4 w-4 mr-2" /> Novo Alerta
+          </Button>
+        </Link>
       </div>
 
       {/* Stats Cards */}
@@ -213,6 +220,15 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Botão flutuante - sempre visível */}
+      <Link
+        href="/dashboard/alerts"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-full shadow-lg hover:shadow-xl transition-all"
+      >
+        <Plus className="h-5 w-5" />
+        <span className="font-medium text-sm">Novo Alerta</span>
+      </Link>
     </div>
   );
 }

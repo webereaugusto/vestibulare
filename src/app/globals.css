@@ -10,6 +10,10 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+select, option, input, textarea, button {
+  font-family: inherit;
+}
+
 @keyframes slide-in-from-right-5 {
   from {
     transform: translateX(100%);

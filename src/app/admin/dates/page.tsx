@@ -321,7 +321,7 @@ export default function AdminDatesPage() {
             <select
               value={form.vestibular_id}
               onChange={(e) => setForm((f) => ({ ...f, vestibular_id: e.target.value }))}
-              className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-sans focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
               <option value="">Selecione...</option>
               {vestibulares.map((v) => (<option key={v.id} value={v.id}>{v.name}</option>))}
@@ -332,7 +332,7 @@ export default function AdminDatesPage() {
             <select
               value={form.event_type}
               onChange={(e) => setForm((f) => ({ ...f, event_type: e.target.value as EventType }))}
-              className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-sans focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
               {EVENT_TYPES.map((t) => (<option key={t.value} value={t.value}>{t.label}</option>))}
             </select>
