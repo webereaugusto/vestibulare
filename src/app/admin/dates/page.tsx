@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Calendar, Database, Search, X, ExternalLink, FileText } from 'lucide-react';
+import { Plus, Pencil, Trash2, Calendar, Database, Search, X, ExternalLink, FileText, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -45,6 +45,8 @@ export default function AdminDatesPage() {
   const [searchText, setSearchText] = useState('');
   const [filterVestibular, setFilterVestibular] = useState('');
   const [filterEventType, setFilterEventType] = useState('');
+  const [broadcastTarget, setBroadcastTarget] = useState<(ImportantDate & { vestibular: Vestibular }) | null>(null);
+  const [broadcasting, setBroadcasting] = useState(false);
   const { addToast } = useToast();
   const supabase = createBrowserClient();
 
@@ -144,6 +146,29 @@ export default function AdminDatesPage() {
     const { error } = await supabase.from('important_dates').delete().eq('id', id);
     if (error) addToast('Erro ao excluir.', 'error');
     else { addToast('Data excluída.', 'success'); loadData(); }
+  }
+
+  async function handleBroadcast() {
+    if (!broadcastTarget) return;
+    setBroadcasting(true);
+    try {
+      const res = await fetch('/api/admin/broadcast-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ importantDateId: broadcastTarget.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        addToast(data.message || 'Disparo realizado!', 'success');
+      } else {
+        addToast(data.error || 'Erro no disparo.', 'error');
+      }
+    } catch {
+      addToast('Erro ao disparar alertas.', 'error');
+    } finally {
+      setBroadcasting(false);
+      setBroadcastTarget(null);
+    }
   }
 
   // Filtrar datas
@@ -287,8 +312,9 @@ export default function AdminDatesPage() {
                   </div>
                 </div>
                 <div className="flex gap-1 flex-shrink-0">
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(d)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(d.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => setBroadcastTarget(d)} title="Enviar alerta agora"><Send className="h-4 w-4 text-indigo-500" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => openEdit(d)} title="Editar"><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDelete(d.id)} title="Excluir"><Trash2 className="h-4 w-4 text-red-500" /></Button>
                 </div>
               </div>
             </CardContent>
@@ -313,6 +339,35 @@ export default function AdminDatesPage() {
           </Card>
         )}
       </div>
+
+      {/* Modal de confirmação de disparo */}
+      <Modal open={!!broadcastTarget} onClose={() => !broadcasting && setBroadcastTarget(null)} title="Confirmar Disparo de Alerta">
+        {broadcastTarget && (
+          <div className="space-y-4">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-sm text-amber-800">
+                Tem certeza que deseja enviar o aviso <strong>&quot;{broadcastTarget.event_name}&quot;</strong> para
+                o vestibular <strong>&quot;{(broadcastTarget.vestibular as Vestibular)?.name}&quot;</strong> agora?
+              </p>
+              <p className="text-xs text-amber-600 mt-2">
+                Todos os usuários inscritos neste vestibular receberão o alerta imediatamente nos canais configurados (email, SMS, WhatsApp).
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setBroadcastTarget(null)} disabled={broadcasting}>
+                Cancelar
+              </Button>
+              <Button onClick={handleBroadcast} loading={broadcasting}>
+                {broadcasting ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Enviando...</>
+                ) : (
+                  <><Send className="h-4 w-4 mr-2" /> Sim, Enviar Agora</>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal open={showModal} onClose={() => setShowModal(false)} title={editing ? 'Editar Data' : 'Nova Data'}>
         <div className="space-y-4">
