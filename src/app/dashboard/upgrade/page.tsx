@@ -107,6 +107,7 @@ export default function UpgradePage() {
               <CardHeader className="text-center">
                 {key === 'premium' && <Crown className="h-8 w-8 text-emerald-600 mx-auto mb-2" />}
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
+                <p className="text-sm text-gray-500 mt-1">{plan.description}</p>
                 <div className="mt-4">
                   <span className="text-4xl font-bold text-gray-900">
                     {plan.price === 0 ? 'Grátis' : formatPrice(plan.price)}

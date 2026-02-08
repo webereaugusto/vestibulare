@@ -72,15 +72,26 @@ export async function GET(req: Request) {
         const plan = PLANS[profile.plan_type];
         if (!plan) continue;
 
+        // Verificar se o tipo de evento é permitido pelo plano
+        if (plan.allowedEventTypes && !plan.allowedEventTypes.includes(dateRecord.event_type as import('@/types/database').EventType)) continue;
+
         // Verificar expiração do plano pago
         if (profile.plan_type !== 'free' && profile.plan_expires_at) {
           const expiresAt = new Date(profile.plan_expires_at);
           if (expiresAt < today) continue; // Plano expirado
         }
 
+        // Verificar limite de alertas enviados (contar alertas sent do usuario no periodo)
+        const { count: sentCount } = await supabase
+          .from('alert_logs')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_alert_id', alert.id)
+          .eq('status', 'sent');
+        if ((sentCount || 0) >= plan.maxAlerts) continue;
+
         const vestibular = dateRecord.vestibular as Vestibular;
         const importantDate = dateRecord as ImportantDate;
-        const channels: AlertChannel[] = alert.channels || ['email'];
+        const channels: AlertChannel[] = alert.channels || ['whatsapp'];
 
         for (const channel of channels) {
           // Verificar se canal é permitido pelo plano

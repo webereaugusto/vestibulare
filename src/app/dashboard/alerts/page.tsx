@@ -30,7 +30,7 @@ export default function AlertsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingAlert, setEditingAlert] = useState<(UserAlert & { vestibular: Vestibular }) | null>(null);
   const [selectedVestibular, setSelectedVestibular] = useState<string>('');
-  const [selectedChannels, setSelectedChannels] = useState<AlertChannel[]>(['email']);
+  const [selectedChannels, setSelectedChannels] = useState<AlertChannel[]>(['whatsapp']);
   const [allEventTypes, setAllEventTypes] = useState(true);
   const [selectedEventTypes, setSelectedEventTypes] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ export default function AlertsPage() {
   function openCreate() {
     setEditingAlert(null);
     setSelectedVestibular('');
-    setSelectedChannels(['email']);
+    setSelectedChannels(['whatsapp']);
     setAllEventTypes(true);
     setSelectedEventTypes([]);
     setShowModal(true);
@@ -76,7 +76,7 @@ export default function AlertsPage() {
   function openEdit(alert: UserAlert & { vestibular: Vestibular }) {
     setEditingAlert(alert);
     setSelectedVestibular(alert.vestibular_id);
-    setSelectedChannels(alert.channels || ['email']);
+    setSelectedChannels(alert.channels || ['whatsapp']);
     if (!Array.isArray(alert.event_types) || alert.event_types.length === 0) {
       setAllEventTypes(true);
       setSelectedEventTypes([]);
@@ -113,7 +113,15 @@ export default function AlertsPage() {
     }
 
     // Event types: null = todos, array = específicos
-    const eventTypes = allEventTypes ? null : (selectedEventTypes.length > 0 ? selectedEventTypes : null);
+    // Para planos com allowedEventTypes (ex: free), forçar os tipos permitidos
+    let eventTypes: EventType[] | null;
+    if (plan.allowedEventTypes) {
+      // Plano com restrição de tipos: salvar apenas os selecionados dentro do permitido
+      const filtered = selectedEventTypes.filter(et => plan.allowedEventTypes!.includes(et));
+      eventTypes = filtered.length > 0 ? filtered : plan.allowedEventTypes;
+    } else {
+      eventTypes = allEventTypes ? null : (selectedEventTypes.length > 0 ? selectedEventTypes : null);
+    }
 
     if (editingAlert) {
       // Atualizar alerta existente
@@ -152,7 +160,7 @@ export default function AlertsPage() {
         addToast('Alerta criado com sucesso!', 'success');
         setShowModal(false);
         setSelectedVestibular('');
-        setSelectedChannels(['email']);
+        setSelectedChannels(['whatsapp']);
         setAllEventTypes(true);
         setSelectedEventTypes([]);
         await loadData();
@@ -238,7 +246,7 @@ export default function AlertsPage() {
                   Plano {plan.name}
                 </Badge>
                 <span className="text-sm text-gray-500">
-                  {plan.channels.map((c) => formatChannel(c)).join(', ')}
+                  {plan.channels.map((c) => formatChannel(c)).join(', ')} | At\u00e9 {plan.maxAlerts} alertas
                 </span>
               </div>
 
@@ -247,11 +255,15 @@ export default function AlertsPage() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-medium text-gray-700">
-                      {activeCount} de {plan.maxVestibulares} vestibulares
+                      {plan.maxVestibulares >= 999
+                        ? `${activeCount} vestibulares (sem limite)`
+                        : `${activeCount} de ${plan.maxVestibulares} vestibulares`}
                     </span>
-                    <span className="text-xs text-gray-500">
-                      {plan.maxVestibulares - activeCount} disponíveis
-                    </span>
+                    {plan.maxVestibulares < 999 && (
+                      <span className="text-xs text-gray-500">
+                        {plan.maxVestibulares - activeCount} dispon\u00edveis
+                      </span>
+                    )}
                   </div>
                   <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
                     <div
@@ -414,7 +426,7 @@ export default function AlertsPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Canais de alerta</label>
             <div className="flex flex-wrap gap-2">
-              {(['email', 'sms', 'whatsapp'] as AlertChannel[]).map((channel) => {
+              {(['whatsapp', 'sms', 'email'] as AlertChannel[]).map((channel) => {
                 const isAllowed = plan.channels.includes(channel);
                 const isSelected = selectedChannels.includes(channel);
                 return (
@@ -444,68 +456,107 @@ export default function AlertsPage() {
               Tipos de alerta
             </label>
 
-            {/* Toggle todos / selecionar */}
-            <div className="flex gap-2 mb-3">
-              <button
-                onClick={() => {
-                  setAllEventTypes(true);
-                  setSelectedEventTypes([]);
-                }}
-                className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
-                  allEventTypes
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Todos os alertas
-              </button>
-              <button
-                onClick={() => setAllEventTypes(false)}
-                className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
-                  !allEventTypes
-                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Selecionar tipos
-              </button>
-            </div>
-
-            {/* Grid de tipos de evento */}
-            {!allEventTypes && (
-              <div className="grid grid-cols-2 gap-2">
-                {ALL_EVENT_TYPES.map((type) => {
-                  const isSelected = selectedEventTypes.includes(type.value);
-                  return (
-                    <button
-                      key={type.value}
-                      onClick={() => toggleEventType(type.value)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors text-left ${
-                        isSelected
-                          ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
-                          : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
-                          isSelected ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300'
-                        }`}>
-                          {isSelected && (
-                            <Check className="h-3 w-3 text-white" />
-                          )}
+            {/* Se plano free, mostrar apenas os tipos permitidos sem opção de escolher todos */}
+            {plan.allowedEventTypes ? (
+              <div>
+                <p className="text-xs text-gray-500 mb-2">
+                  Seu plano permite alertas de: <strong>{plan.allowedEventTypes.map(et => formatEventType(et)).join(' e ')}</strong>.{' '}
+                  <Link href="/dashboard/upgrade" className="text-emerald-600 hover:underline">Faça upgrade</Link> para mais tipos.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {ALL_EVENT_TYPES.filter(t => plan.allowedEventTypes!.includes(t.value)).map((type) => {
+                    const isSelected = selectedEventTypes.includes(type.value);
+                    return (
+                      <button
+                        key={type.value}
+                        onClick={() => toggleEventType(type.value)}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors text-left ${
+                          isSelected
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                            : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                            isSelected ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300'
+                          }`}>
+                            {isSelected && (
+                              <Check className="h-3 w-3 text-white" />
+                            )}
+                          </span>
+                          {type.label}
                         </span>
-                        {type.label}
-                      </span>
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            )}
+            ) : (
+              <>
+                {/* Toggle todos / selecionar */}
+                <div className="flex gap-2 mb-3">
+                  <button
+                    onClick={() => {
+                      setAllEventTypes(true);
+                      setSelectedEventTypes([]);
+                    }}
+                    className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                      allEventTypes
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Todos os alertas
+                  </button>
+                  <button
+                    onClick={() => setAllEventTypes(false)}
+                    className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                      !allEventTypes
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    Selecionar tipos
+                  </button>
+                </div>
 
-            {!allEventTypes && selectedEventTypes.length === 0 && (
-              <p className="text-xs text-amber-600 mt-2">
-                Selecione pelo menos um tipo ou escolha &quot;Todos os alertas&quot;.
-              </p>
+                {/* Grid de tipos de evento */}
+                {!allEventTypes && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {ALL_EVENT_TYPES.map((type) => {
+                      const isSelected = selectedEventTypes.includes(type.value);
+                      return (
+                        <button
+                          key={type.value}
+                          onClick={() => toggleEventType(type.value)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors text-left ${
+                            isSelected
+                              ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                              : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                              isSelected ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300'
+                            }`}>
+                              {isSelected && (
+                                <Check className="h-3 w-3 text-white" />
+                              )}
+                            </span>
+                            {type.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {!allEventTypes && selectedEventTypes.length === 0 && (
+                  <p className="text-xs text-amber-600 mt-2">
+                    Selecione pelo menos um tipo ou escolha &quot;Todos os alertas&quot;.
+                  </p>
+                )}
+              </>
             )}
           </div>
 
@@ -520,7 +571,7 @@ export default function AlertsPage() {
               disabled={
                 (!editingAlert && !selectedVestibular) ||
                 selectedChannels.length === 0 ||
-                (!allEventTypes && selectedEventTypes.length === 0)
+                (!plan.allowedEventTypes && !allEventTypes && selectedEventTypes.length === 0)
               }
             >
               {editingAlert ? 'Salvar' : 'Criar Alerta'}

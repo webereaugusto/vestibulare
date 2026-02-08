@@ -84,13 +84,19 @@ export async function POST(req: Request) {
       const plan = PLANS[userProfile.plan_type];
       if (!plan) { totalSkipped++; continue; }
 
+      // Verificar se o tipo de evento é permitido pelo plano
+      if (plan.allowedEventTypes && !plan.allowedEventTypes.includes(dateRecord.event_type as import('@/types/database').EventType)) {
+        totalSkipped++;
+        continue;
+      }
+
       // Verificar expiração do plano pago
       if (userProfile.plan_type !== 'free' && userProfile.plan_expires_at) {
         const expiresAt = new Date(userProfile.plan_expires_at);
         if (expiresAt < new Date()) { totalSkipped++; continue; }
       }
 
-      const channels: AlertChannel[] = alert.channels || ['email'];
+      const channels: AlertChannel[] = alert.channels || ['whatsapp'];
 
       for (const channel of channels) {
         // Verificar se canal é permitido pelo plano
