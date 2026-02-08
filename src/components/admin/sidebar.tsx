@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  GraduationCap,
+  MessageCircle,
   LayoutDashboard,
   BookOpen,
   Calendar,
@@ -14,7 +14,6 @@ import {
   X,
   ArrowLeft,
   Mail,
-  MessageSquare,
   Smartphone,
   Users,
 } from 'lucide-react';
@@ -33,7 +32,7 @@ const navItems = [
   { href: '/admin/scraper', icon: Bot, label: 'Scraper' },
   { href: '/admin/test-email', icon: Mail, label: 'Teste de Email' },
   { href: '/admin/test-sms', icon: Smartphone, label: 'Teste de SMS' },
-  { href: '/admin/evolution', icon: MessageSquare, label: 'WhatsApp' },
+  { href: '/admin/evolution', icon: MessageCircle, label: 'WhatsApp' },
 ];
 
 interface AdminSidebarProps {
@@ -73,9 +72,9 @@ export function AdminSidebar({ profile }: AdminSidebarProps) {
       >
         <div className="h-16 flex items-center px-6 border-b border-gray-800">
           <Link href="/admin" className="flex items-center gap-2">
-            <GraduationCap className="h-7 w-7 text-indigo-400" />
+            <MessageCircle className="h-7 w-7 text-emerald-400" />
             <span className="text-lg font-bold">
-              Vestibula<span className="text-indigo-400">Re</span>
+              Zap<span className="text-emerald-400">Vest</span>
             </span>
           </Link>
           <Badge className="ml-2 bg-red-600 text-white text-[10px]">Admin</Badge>
@@ -97,11 +96,11 @@ export function AdminSidebar({ profile }: AdminSidebarProps) {
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-indigo-600/20 text-indigo-300'
+                    ? 'bg-emerald-600/20 text-emerald-300'
                     : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
                 )}
               >
-                <item.icon className={cn('h-5 w-5', isActive ? 'text-indigo-400' : 'text-gray-500')} />
+                <item.icon className={cn('h-5 w-5', isActive ? 'text-emerald-400' : 'text-gray-500')} />
                 {item.label}
               </Link>
             );

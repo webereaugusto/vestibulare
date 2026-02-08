@@ -3,11 +3,10 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { GraduationCap, Zap } from 'lucide-react';
+import { MessageCircle, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { createBrowserClient } from '@/lib/supabase';
 import { PLANS, formatPrice } from '@/lib/plans';
 import { PlanType } from '@/types/database';
@@ -16,7 +15,7 @@ export default function SignupPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     }>
       <SignupForm />
@@ -74,11 +73,7 @@ function SignupForm() {
         return;
       }
 
-      // Se o Supabase exige confirmação de email, o user existe mas a sessão não
-      // Checa se o signup retornou uma sessão (confirmação desabilitada) ou não
       if (data.session) {
-        // Sessão criada direto - confirmação de email desabilitada
-        // Atualizar phone no profile se fornecido
         if (phone && data.user) {
           await supabase
             .from('profiles')
@@ -86,7 +81,6 @@ function SignupForm() {
             .eq('id', data.user.id);
         }
 
-        // Se plano pago selecionado, redirecionar para pagamento
         if (isPaidPlan) {
           setRedirectingToPayment(true);
           try {
@@ -108,7 +102,6 @@ function SignupForm() {
         router.push('/dashboard');
         router.refresh();
       } else {
-        // Confirmação de email necessária
         setSuccess(true);
       }
     } catch {
@@ -124,9 +117,9 @@ function SignupForm() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2">
-              <GraduationCap className="h-10 w-10 text-indigo-600" />
+              <MessageCircle className="h-10 w-10 text-emerald-600" />
               <span className="text-2xl font-bold text-gray-900">
-                Vestibula<span className="text-indigo-600">Re</span>
+                Zap<span className="text-emerald-600">Vest</span>
               </span>
             </Link>
           </div>
@@ -159,25 +152,25 @@ function SignupForm() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <GraduationCap className="h-10 w-10 text-indigo-600" />
+            <MessageCircle className="h-10 w-10 text-emerald-600" />
             <span className="text-2xl font-bold text-gray-900">
-              Vestibula<span className="text-indigo-600">Re</span>
+              Zap<span className="text-emerald-600">Vest</span>
             </span>
           </Link>
         </div>
 
         {/* Banner do plano selecionado */}
         {isPaidPlan && planInfo && (
-          <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center">
+          <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-center">
             <div className="flex items-center justify-center gap-2 mb-1">
               <Zap className="h-5 w-5" />
               <span className="font-semibold text-lg">Plano {planInfo.name}</span>
             </div>
-            <p className="text-indigo-100 text-sm">
+            <p className="text-emerald-100 text-sm">
               {formatPrice(planInfo.price)}/ano - {planInfo.features[0]}
             </p>
-            <p className="text-indigo-200 text-xs mt-1">
-              Crie sua conta e vá direto para o pagamento
+            <p className="text-emerald-200 text-xs mt-1">
+              Crie sua conta e va direto para o pagamento
             </p>
           </div>
         )}
@@ -233,7 +226,7 @@ function SignupForm() {
                 id="password"
                 label="Senha"
                 type="password"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Minimo 6 caracteres"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -245,21 +238,21 @@ function SignupForm() {
                   ? 'Redirecionando para pagamento...'
                   : isPaidPlan
                     ? `Criar Conta e Assinar ${planInfo?.name}`
-                    : 'Criar Conta Grátis'
+                    : 'Criar Conta Gratis'
                 }
               </Button>
             </form>
 
             <p className="mt-4 text-center text-xs text-gray-500">
-              Ao criar uma conta, você concorda com nossos{' '}
+              Ao criar uma conta, voce concorda com nossos{' '}
               <a href="#" className="underline hover:text-gray-700">Termos de Uso</a>
               {' '}e{' '}
-              <a href="#" className="underline hover:text-gray-700">Política de Privacidade</a>.
+              <a href="#" className="underline hover:text-gray-700">Politica de Privacidade</a>.
             </p>
 
             <div className="mt-6 text-center text-sm text-gray-600">
-              Já tem uma conta?{' '}
-              <Link href="/auth/login" className="text-indigo-600 hover:underline font-medium">
+              Ja tem uma conta?{' '}
+              <Link href="/auth/login" className="text-emerald-600 hover:underline font-medium">
                 Entrar
               </Link>
             </div>

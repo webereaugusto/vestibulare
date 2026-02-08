@@ -144,7 +144,7 @@ export default function AdminUserDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     );
   }
@@ -170,7 +170,7 @@ export default function AdminUserDetailPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5 text-indigo-600" />
+            <User className="h-5 w-5 text-emerald-600" />
             Informacoes do Usuario
           </CardTitle>
         </CardHeader>
@@ -221,7 +221,7 @@ export default function AdminUserDetailPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-indigo-600" />
+                <Bell className="h-5 w-5 text-emerald-600" />
                 Vestibulares ({alerts.length})
               </CardTitle>
               <CardDescription>Alertas configurados para este usuario.</CardDescription>
@@ -331,7 +331,7 @@ export default function AdminUserDetailPage() {
             <select
               value={newAlertVestId}
               onChange={(e) => setNewAlertVestId(e.target.value)}
-              className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-sans focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
             >
               <option value="">Selecione...</option>
               {availableVestibulares.map((v) => (
@@ -345,7 +345,7 @@ export default function AdminUserDetailPage() {
             <div className="flex gap-2 flex-wrap">
               {(['email', 'sms', 'whatsapp'] as AlertChannel[]).map((ch) => (
                 <label key={ch} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors text-sm ${
-                  newAlertChannels.includes(ch) ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                  newAlertChannels.includes(ch) ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}>
                   <input
                     type="checkbox"

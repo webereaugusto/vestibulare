@@ -7,7 +7,7 @@
 
 const getBaseUrl = () => process.env.EVOLUTION_API_URL || '';
 const getApiKey = () => process.env.EVOLUTION_API_KEY || '';
-const getInstanceName = () => process.env.EVOLUTION_INSTANCE_NAME || 'vestibulare';
+const getInstanceName = () => process.env.EVOLUTION_INSTANCE_NAME || 'zapvest';
 
 function headers() {
   return {
@@ -250,7 +250,7 @@ export function buildAlertMessage(params: {
   officialUrl?: string;
 }): string {
   const lines = [
-    `🎓 *VestibulaRe - Alerta de Vestibular*`,
+    `*ZapVest - Alerta de Vestibular*`,
     ``,
     `Olá, *${params.userName}*!`,
     ``,
@@ -264,7 +264,7 @@ export function buildAlertMessage(params: {
     lines.push(``, `🔗 Site oficial: ${params.officialUrl}`);
   }
 
-  lines.push(``, `_Enviado por VestibulaRe_`);
+  lines.push(``, `_Enviado por ZapVest_`);
 
   return lines.join('\n');
 }

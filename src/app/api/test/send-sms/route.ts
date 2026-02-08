@@ -27,13 +27,13 @@ export async function POST(req: Request) {
     const formattedPhone = formatPhoneForSms(phone);
 
     const sendSms = new Brevo.SendTransacSms();
-    sendSms.sender = 'VestibulRe';
+    sendSms.sender = 'ZapVest';
     sendSms.recipient = formattedPhone;
 
     if (type === 'alert') {
-      sendSms.content = `VestibulaRe: ENEM 2026 - Inscricoes em 3 dias (10 de fevereiro de 2026). Acesse vestibulare.com.br`;
+      sendSms.content = `ZapVest: ENEM 2026 - Inscricoes em 3 dias (10 de fevereiro de 2026). Acesse zapvest.com.br`;
     } else {
-      sendSms.content = message || `VestibulaRe: Teste de SMS realizado com sucesso! Se voce recebeu esta mensagem, a integracao com Brevo SMS esta funcionando.`;
+      sendSms.content = message || `ZapVest: Teste de SMS realizado com sucesso! Se voce recebeu esta mensagem, a integracao com Brevo SMS esta funcionando.`;
     }
 
     const result = await smsApi.sendTransacSms(sendSms);

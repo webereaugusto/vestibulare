@@ -23,7 +23,7 @@ export async function createPaymentPreference({
       items: [
         {
           id: `plan-${planType}`,
-          title: `VestibulaRe - Plano ${plan.name}`,
+          title: `ZapVest - Plano ${plan.name}`,
           description: `Assinatura anual do plano ${plan.name}`,
           quantity: 1,
           unit_price: plan.price,

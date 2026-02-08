@@ -69,7 +69,7 @@ export default function AdminTestEmailPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-indigo-600" />
+            <Mail className="h-5 w-5 text-emerald-600" />
             Configuração do Teste
           </CardTitle>
           <CardDescription>
@@ -127,7 +127,7 @@ export default function AdminTestEmailPage() {
               <p className="text-amber-700">
                 O Brevo precisa de um <strong>remetente verificado</strong>. Vá em{' '}
                 <strong>Brevo &gt; Settings &gt; Senders &amp; IPs</strong> e adicione/verifique o email remetente.
-                Por padrão, o sistema usa <code className="bg-amber-100 px-1 rounded">alertas@vestibulare.com.br</code>.
+                Por padrão, o sistema usa <code className="bg-amber-100 px-1 rounded">alertas@zapvest.com.br</code>.
                 Se não tiver um domínio próprio, altere para um email verificado no Brevo.
               </p>
             </div>

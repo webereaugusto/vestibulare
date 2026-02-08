@@ -77,7 +77,7 @@ export default function AdminTestSmsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5 text-indigo-600" />
+            <Smartphone className="h-5 w-5 text-emerald-600" />
             Configuração do Teste
           </CardTitle>
           <CardDescription>
@@ -143,7 +143,7 @@ export default function AdminTestSmsPage() {
               <p className="font-medium text-blue-800 mb-1">Como funciona o SMS via Brevo</p>
               <ul className="text-blue-700 space-y-1 list-disc pl-4">
                 <li>Nao precisa de celular ou chip -- funciona 100% pela API</li>
-                <li>O remetente aparece como <code className="bg-blue-100 px-1 rounded">VestibulRe</code> (alfanumerico)</li>
+                <li>O remetente aparece como <code className="bg-blue-100 px-1 rounded">ZapVest</code> (alfanumerico)</li>
                 <li>Cada SMS gasta creditos da sua conta Brevo</li>
                 <li>O numero do destinatario e formatado automaticamente para +55...</li>
               </ul>

@@ -78,7 +78,7 @@ export default function AdminScraperPage() {
                   className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
                 >
                   <div className="flex items-center gap-3">
-                    <Bot className="h-5 w-5 text-indigo-600" />
+                    <Bot className="h-5 w-5 text-emerald-600" />
                     <div>
                       <p className="font-medium text-gray-900">{scraper.name}</p>
                       <p className="text-xs text-gray-500">{scraper.url}</p>

@@ -86,8 +86,8 @@ export default async function DashboardPage() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-indigo-50">
-                <Bell className="h-6 w-6 text-indigo-600" />
+              <div className="p-3 rounded-lg bg-emerald-50">
+                <Bell className="h-6 w-6 text-emerald-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900">{alertCount}</p>
@@ -228,9 +228,9 @@ export default async function DashboardPage() {
 
       {/* CTA para adicionar alertas */}
       {alertCount === 0 && (
-        <Card className="border-indigo-200 bg-indigo-50">
+        <Card className="border-emerald-200 bg-emerald-50">
           <CardContent className="p-6 text-center">
-            <Bell className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
+            <Bell className="h-12 w-12 text-emerald-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Configure seus primeiros alertas
             </h3>
@@ -247,7 +247,7 @@ export default async function DashboardPage() {
       {/* Botão flutuante - sempre visível */}
       <Link
         href="/dashboard/alerts"
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-full shadow-lg hover:shadow-xl transition-all"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-full shadow-lg hover:shadow-xl transition-all"
       >
         <Plus className="h-5 w-5" />
         <span className="font-medium text-sm">Novo Alerta</span>

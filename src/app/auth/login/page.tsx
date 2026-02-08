@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { GraduationCap } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -53,9 +53,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <GraduationCap className="h-10 w-10 text-indigo-600" />
+            <MessageCircle className="h-10 w-10 text-emerald-600" />
             <span className="text-2xl font-bold text-gray-900">
-              Vestibula<span className="text-indigo-600">Re</span>
+              Zap<span className="text-emerald-600">Vest</span>
             </span>
           </Link>
         </div>
@@ -100,7 +100,7 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center text-sm text-gray-600">
               Não tem uma conta?{' '}
-              <Link href="/auth/signup" className="text-indigo-600 hover:underline font-medium">
+              <Link href="/auth/signup" className="text-emerald-600 hover:underline font-medium">
                 Criar conta grátis
               </Link>
             </div>

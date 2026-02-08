@@ -233,7 +233,7 @@ export default function SettingsPage() {
                     value={verify.code}
                     onChange={(e) => setVerify((prev) => ({ ...prev, code: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
                     placeholder="000000"
-                    className="w-28 h-9 text-center text-lg font-mono tracking-widest rounded-lg border border-gray-300 bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-28 h-9 text-center text-lg font-mono tracking-widest rounded-lg border border-gray-300 bg-white focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
                   <Button
                     size="sm"
@@ -250,7 +250,7 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => handleSendCode(channel)}
                     disabled={verify.cooldown > 0 || verify.sending}
-                    className="text-xs text-indigo-600 hover:text-indigo-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    className="text-xs text-emerald-600 hover:text-emerald-800 disabled:text-gray-400 disabled:cursor-not-allowed"
                   >
                     {verify.cooldown > 0 ? `Reenviar em ${verify.cooldown}s` : 'Reenviar codigo'}
                   </button>
@@ -277,7 +277,7 @@ export default function SettingsPage() {
   if (!profile) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     );
   }
@@ -309,7 +309,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-3">
           {renderVerificationCard(
             'email',
-            <Mail className="h-4 w-4 text-indigo-600" />,
+            <Mail className="h-4 w-4 text-emerald-600" />,
             'Email',
             profile.email,
             profile.email_verified,

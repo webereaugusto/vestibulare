@@ -6,10 +6,10 @@ import { ToastProvider } from '@/components/ui/toast';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'VestibulaRe - Alertas de Vestibulares',
+  title: 'ZapVest - Alertas de Vestibulares no WhatsApp',
   description:
-    'Nunca mais perca uma data importante de vestibular. Receba alertas automáticos por email, SMS e WhatsApp sobre ENEM, ProUni, FIES, FUVEST e muito mais.',
-  keywords: 'vestibular, enem, prouni, fies, alertas, inscrição, prova, resultado',
+    'Receba alertas de vestibulares direto no seu WhatsApp, SMS e email. ENEM, ProUni, FIES, FUVEST e muito mais. Nunca mais perca uma data importante.',
+  keywords: 'vestibular, enem, prouni, fies, alertas, whatsapp, inscricao, prova, resultado, zapvest',
 };
 
 export default function RootLayout({

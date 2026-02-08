@@ -42,7 +42,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const icons: Record<ToastType, React.ReactNode> = {
     success: <CheckCircle className="h-5 w-5 text-emerald-500" />,
     error: <XCircle className="h-5 w-5 text-red-500" />,
-    info: <AlertCircle className="h-5 w-5 text-indigo-500" />,
+    info: <AlertCircle className="h-5 w-5 text-emerald-500" />,
   };
 
   return (
@@ -56,7 +56,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               'flex items-center gap-3 rounded-lg border bg-white px-4 py-3 shadow-lg animate-in slide-in-from-right-5',
               toast.type === 'success' && 'border-emerald-200',
               toast.type === 'error' && 'border-red-200',
-              toast.type === 'info' && 'border-indigo-200'
+              toast.type === 'info' && 'border-emerald-200'
             )}
           >
             {icons[toast.type]}

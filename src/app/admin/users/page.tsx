@@ -133,7 +133,7 @@ export default function AdminUsersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     );
   }
@@ -161,7 +161,7 @@ export default function AdminUsersPage() {
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-indigo-600">{planCounts.basic}</p>
+            <p className="text-2xl font-bold text-emerald-600">{planCounts.basic}</p>
             <p className="text-xs text-gray-500">Basico</p>
           </CardContent>
         </Card>
@@ -184,13 +184,13 @@ export default function AdminUsersPage() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Buscar por nome, email ou telefone..."
-                className="w-full h-10 pl-10 pr-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-colors"
+                className="w-full h-10 pl-10 pr-3 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-colors"
               />
             </div>
             <select
               value={filterPlan}
               onChange={(e) => setFilterPlan(e.target.value)}
-              className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 font-sans focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 sm:w-44"
+              className="h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-700 font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 sm:w-44"
             >
               <option value="">Todos os planos</option>
               <option value="free">Gratuito</option>
@@ -219,8 +219,8 @@ export default function AdminUsersPage() {
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {/* Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm font-bold text-indigo-600">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm font-bold text-emerald-600">
                       {(user.full_name || user.email).charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -262,7 +262,7 @@ export default function AdminUsersPage() {
                   </Button>
                   <Link href={`/admin/users/${user.id}`}>
                     <Button variant="ghost" size="icon" title="Ver detalhes e alertas">
-                      <ExternalLink className="h-4 w-4 text-indigo-500" />
+                      <ExternalLink className="h-4 w-4 text-emerald-500" />
                     </Button>
                   </Link>
                   <Button variant="ghost" size="icon" onClick={() => handleDelete(user)} title="Excluir usuario" disabled={user.is_admin && user.id === users.find(u => u.is_admin)?.id}>
@@ -299,7 +299,7 @@ export default function AdminUsersPage() {
                 <label
                   key={plan}
                   className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedPlan === plan ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50'
+                    selectedPlan === plan ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:bg-gray-50'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -309,7 +309,7 @@ export default function AdminUsersPage() {
                       value={plan}
                       checked={selectedPlan === plan}
                       onChange={() => setSelectedPlan(plan)}
-                      className="text-indigo-600"
+                      className="text-emerald-600"
                     />
                     <div>
                       <p className="text-sm font-medium text-gray-900">{PLANS[plan].name}</p>

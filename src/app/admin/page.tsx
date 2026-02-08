@@ -23,7 +23,7 @@ export default async function AdminDashboardPage() {
 
   const stats = [
     { label: 'Usuários', value: usersCount || 0, icon: Users, color: 'bg-blue-50 text-blue-600' },
-    { label: 'Vestibulares', value: vestibularesCount || 0, icon: BookOpen, color: 'bg-indigo-50 text-indigo-600' },
+    { label: 'Vestibulares', value: vestibularesCount || 0, icon: BookOpen, color: 'bg-emerald-50 text-emerald-600' },
     { label: 'Datas Cadastradas', value: datesCount || 0, icon: Calendar, color: 'bg-purple-50 text-purple-600' },
     { label: 'Alertas Ativos', value: alertsCount || 0, icon: Bell, color: 'bg-emerald-50 text-emerald-600' },
     { label: 'Alertas Enviados', value: sentAlertsCount || 0, icon: TrendingUp, color: 'bg-amber-50 text-amber-600' },

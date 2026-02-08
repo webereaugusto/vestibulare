@@ -1,5 +1,5 @@
 -- =============================================
--- VestibulaRe - Setup do Banco de Dados
+-- ZapVest - Setup do Banco de Dados
 -- Execute este SQL no Supabase SQL Editor
 -- =============================================
 

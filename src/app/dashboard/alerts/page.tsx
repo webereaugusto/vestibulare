@@ -200,7 +200,7 @@ export default function AlertsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     );
   }
@@ -226,7 +226,7 @@ export default function AlertsPage() {
       </div>
 
       {/* Banner do Plano */}
-      <Card className={planType === 'free' ? 'border-gray-200' : planType === 'basic' ? 'border-indigo-200' : 'border-amber-200'}>
+      <Card className={planType === 'free' ? 'border-gray-200' : planType === 'basic' ? 'border-emerald-200' : 'border-amber-200'}>
         <CardContent className="p-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex-1">
@@ -260,7 +260,7 @@ export default function AlertsPage() {
                           ? 'bg-red-500'
                           : usagePercent >= 70
                             ? 'bg-amber-500'
-                            : 'bg-indigo-600'
+                            : 'bg-emerald-600'
                       }`}
                       style={{ width: `${usagePercent}%` }}
                     />
@@ -279,7 +279,7 @@ export default function AlertsPage() {
             {/* CTA Upgrade */}
             {canUpgrade && (
               <Link href="/dashboard/upgrade" className="flex-shrink-0">
-                <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all">
+                <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all">
                   <Zap className="h-4 w-4" />
                   Fazer Upgrade
                   <ArrowRight className="h-4 w-4" />
@@ -300,8 +300,8 @@ export default function AlertsPage() {
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 min-w-0 flex-1">
-                      <div className="p-2 rounded-lg bg-indigo-50 flex-shrink-0">
-                        <Bell className={`h-5 w-5 ${alert.active ? 'text-indigo-600' : 'text-gray-400'}`} />
+                      <div className="p-2 rounded-lg bg-emerald-50 flex-shrink-0">
+                        <Bell className={`h-5 w-5 ${alert.active ? 'text-emerald-600' : 'text-gray-400'}`} />
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-semibold text-gray-900 truncate">
@@ -391,7 +391,7 @@ export default function AlertsPage() {
               <select
                 value={selectedVestibular}
                 onChange={(e) => setSelectedVestibular(e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-sans focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-sans focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               >
                 <option value="">Selecione um vestibular...</option>
                 {availableVestibulares.map((v) => (
@@ -424,7 +424,7 @@ export default function AlertsPage() {
                     disabled={!isAllowed}
                     className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
                       isSelected && isAllowed
-                        ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                         : isAllowed
                           ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                           : 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
@@ -453,7 +453,7 @@ export default function AlertsPage() {
                 }}
                 className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
                   allEventTypes
-                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                     : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -463,7 +463,7 @@ export default function AlertsPage() {
                 onClick={() => setAllEventTypes(false)}
                 className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
                   !allEventTypes
-                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                     : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -482,13 +482,13 @@ export default function AlertsPage() {
                       onClick={() => toggleEventType(type.value)}
                       className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors text-left ${
                         isSelected
-                          ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                          ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                           : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
                       }`}
                     >
                       <span className="flex items-center gap-2">
                         <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
-                          isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300'
+                          isSelected ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300'
                         }`}>
                           {isSelected && (
                             <Check className="h-3 w-3 text-white" />

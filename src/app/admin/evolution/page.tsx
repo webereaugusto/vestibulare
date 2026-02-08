@@ -155,7 +155,7 @@ export default function AdminEvolutionPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     );
   }
@@ -184,7 +184,7 @@ export default function AdminEvolutionPage() {
                 <pre className="mt-2 bg-amber-100 p-3 rounded-lg text-xs text-amber-900 overflow-x-auto">
 {`EVOLUTION_API_URL=http://localhost:8080
 EVOLUTION_API_KEY=sua-api-key
-EVOLUTION_INSTANCE_NAME=vestibulare`}
+EVOLUTION_INSTANCE_NAME=zapvest`}
                 </pre>
               </div>
             </div>
@@ -320,10 +320,10 @@ EVOLUTION_INSTANCE_NAME=vestibulare`}
 
       {/* QR Code */}
       {qrCode && !isConnected && (
-        <Card className="border-indigo-200">
+        <Card className="border-emerald-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <QrCode className="h-5 w-5 text-indigo-600" />
+              <QrCode className="h-5 w-5 text-emerald-600" />
               Escanear QR Code
             </CardTitle>
             <CardDescription>
@@ -349,7 +349,7 @@ EVOLUTION_INSTANCE_NAME=vestibulare`}
                   />
                 </div>
               )}
-              <div className="flex items-center gap-2 text-sm text-indigo-600">
+              <div className="flex items-center gap-2 text-sm text-emerald-600">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Aguardando leitura do QR Code...
               </div>
@@ -367,7 +367,7 @@ EVOLUTION_INSTANCE_NAME=vestibulare`}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-indigo-600" />
+              <MessageSquare className="h-5 w-5 text-emerald-600" />
               Teste de Mensagem
             </CardTitle>
             <CardDescription>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  GraduationCap,
+  MessageCircle,
   LayoutDashboard,
   Bell,
   CreditCard,
@@ -76,9 +76,9 @@ export function Sidebar({ profile }: SidebarProps) {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
           <Link href="/" className="flex items-center gap-2">
-            <GraduationCap className="h-7 w-7 text-indigo-600" />
+            <MessageCircle className="h-7 w-7 text-emerald-600" />
             <span className="text-lg font-bold text-gray-900">
-              Vestibula<span className="text-indigo-600">Re</span>
+              Zap<span className="text-emerald-600">Vest</span>
             </span>
           </Link>
         </div>
@@ -106,11 +106,11 @@ export function Sidebar({ profile }: SidebarProps) {
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-indigo-50 text-indigo-700'
+                    ? 'bg-emerald-50 text-emerald-700'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 )}
               >
-                <item.icon className={cn('h-5 w-5', isActive ? 'text-indigo-600' : 'text-gray-400')} />
+                <item.icon className={cn('h-5 w-5', isActive ? 'text-emerald-600' : 'text-gray-400')} />
                 {item.label}
               </Link>
             );

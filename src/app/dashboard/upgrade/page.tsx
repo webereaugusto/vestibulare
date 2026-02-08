@@ -58,7 +58,7 @@ export default function UpgradePage() {
   if (!profile) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     );
   }
@@ -91,12 +91,12 @@ export default function UpgradePage() {
             <Card
               key={key}
               className={`relative ${
-                plan.popular ? 'border-indigo-600 border-2 shadow-lg' : ''
-              } ${isCurrent ? 'ring-2 ring-indigo-200' : ''}`}
+                plan.popular ? 'border-emerald-600 border-2 shadow-lg' : ''
+              } ${isCurrent ? 'ring-2 ring-emerald-200' : ''}`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-indigo-600 text-white">Mais Popular</Badge>
+                  <Badge className="bg-emerald-600 text-white">Mais Popular</Badge>
                 </div>
               )}
               {isCurrent && (
@@ -105,7 +105,7 @@ export default function UpgradePage() {
                 </div>
               )}
               <CardHeader className="text-center">
-                {key === 'premium' && <Crown className="h-8 w-8 text-indigo-600 mx-auto mb-2" />}
+                {key === 'premium' && <Crown className="h-8 w-8 text-emerald-600 mx-auto mb-2" />}
                 <CardTitle className="text-xl">{plan.name}</CardTitle>
                 <div className="mt-4">
                   <span className="text-4xl font-bold text-gray-900">

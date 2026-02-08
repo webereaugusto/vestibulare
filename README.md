@@ -1,6 +1,6 @@
-# VestibulaRe - SaaS de Alertas de Vestibulares
+# ZapVest - Alertas de Vestibulares no WhatsApp
 
-Sistema SaaS para alertas automáticos sobre vestibulares brasileiros (ENEM, Provão Paulista, ProUni, FIES, ITA, IME, etc.). Multi-canal (email, SMS, WhatsApp) com 3 planos de assinatura e gestão de datas importantes.
+Sistema SaaS para alertas automaticos sobre vestibulares brasileiros (ENEM, Provao Paulista, ProUni, FIES, ITA, IME, etc.). WhatsApp como canal principal, com SMS e email como complementos. 3 planos de assinatura e gestao de datas importantes.
 
 ## Stack Tecnológica
 

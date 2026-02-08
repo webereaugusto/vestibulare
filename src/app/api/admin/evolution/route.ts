@@ -107,7 +107,7 @@ export async function POST(req: Request) {
         if (!phone) {
           return NextResponse.json({ error: 'Número de telefone obrigatório' }, { status: 400 });
         }
-        const text = message || '✅ Teste VestibulaRe - WhatsApp funcionando!\n\n🎓 Se você recebeu esta mensagem, a integração com Evolution API está configurada corretamente.';
+        const text = message || '✅ Teste ZapVest - WhatsApp funcionando!\n\n🎓 Se você recebeu esta mensagem, a integração com Evolution API está configurada corretamente.';
         const result = await sendTextMessage(phone, text);
         return NextResponse.json({ success: result.success, result });
       }
