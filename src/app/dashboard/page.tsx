@@ -58,6 +58,29 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {/* Banner de verificação */}
+      {(!profile.email_verified || (profile.phone && (!profile.phone_verified || !profile.whatsapp_verified))) && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-800">Verifique seus dados de contato</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Para garantir a entrega dos seus alertas, confirme seus meios de comunicacao.
+                  {!profile.email_verified && ' Email nao verificado.'}
+                  {profile.phone && !profile.phone_verified && ' Telefone (SMS) nao verificado.'}
+                  {profile.phone && !profile.whatsapp_verified && ' WhatsApp nao verificado.'}
+                </p>
+                <Link href="/dashboard/settings" className="text-xs text-amber-800 font-medium hover:text-amber-900 underline mt-1 inline-block">
+                  Verificar agora →
+                </Link>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>

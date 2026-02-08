@@ -38,7 +38,7 @@ interface AlertWithVest extends UserAlert {
   vestibular: Vestibular;
 }
 
-interface LogWithDetails extends AlertLog {
+interface LogWithDetails extends Omit<AlertLog, 'user_alert' | 'important_date'> {
   user_alert: { user_id: string; vestibular: { name: string } };
   important_date: { event_name: string; event_date: string };
 }

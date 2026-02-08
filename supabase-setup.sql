@@ -83,6 +83,24 @@ create table if not exists subscriptions (
   created_at timestamp with time zone default now()
 );
 
+-- Colunas de verificação de canais (execute se já tiver a tabela profiles)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email_verified boolean DEFAULT false;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone_verified boolean DEFAULT false;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS whatsapp_verified boolean DEFAULT false;
+
+-- Tabela de códigos de verificação
+CREATE TABLE IF NOT EXISTS verification_codes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
+  channel text NOT NULL CHECK (channel IN ('email', 'sms', 'whatsapp')),
+  code text NOT NULL,
+  expires_at timestamp with time zone NOT NULL,
+  used boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_verification_codes_user ON verification_codes(user_id);
+CREATE INDEX IF NOT EXISTS idx_verification_codes_lookup ON verification_codes(user_id, channel, code);
+
 -- =============================================
 -- Índices para performance
 -- =============================================

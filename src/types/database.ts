@@ -13,6 +13,9 @@ export interface Profile {
   plan_type: PlanType;
   plan_expires_at: string | null;
   is_admin: boolean;
+  email_verified: boolean;
+  phone_verified: boolean;
+  whatsapp_verified: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -175,6 +175,10 @@ async function sendSmsAlert({
     return { success: false, error: 'Usuário sem telefone cadastrado' };
   }
 
+  if (!user.phone_verified) {
+    return { success: false, error: 'Telefone (SMS) não verificado pelo usuário' };
+  }
+
   const sendSms = new Brevo.SendTransacSms();
   sendSms.sender = 'VestibulRe';
   sendSms.recipient = formatPhoneForSms(user.phone);
@@ -202,6 +206,10 @@ async function sendWhatsAppAlert({
 }) {
   if (!user.phone) {
     return { success: false, error: 'Usuário sem telefone cadastrado' };
+  }
+
+  if (!user.whatsapp_verified) {
+    return { success: false, error: 'WhatsApp não verificado pelo usuário' };
   }
 
   // Usa Evolution API para envio de WhatsApp
