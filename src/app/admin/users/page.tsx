@@ -6,7 +6,6 @@ import {
   Users,
   Search,
   Crown,
-  Shield,
   Trash2,
   Bell,
   Mail,
@@ -108,12 +107,6 @@ export default function AdminUsersPage() {
   async function handleDelete(user: UserWithStats) {
     if (!confirm(`Tem certeza que deseja excluir o usuario "${user.full_name || user.email}"? Esta acao nao pode ser desfeita.`)) return;
     await handleAction('delete', { userId: user.id });
-  }
-
-  async function handleToggleAdmin(user: UserWithStats) {
-    const newVal = !user.is_admin;
-    if (newVal && !confirm(`Tornar "${user.full_name || user.email}" administrador?`)) return;
-    await handleAction('toggle-admin', { userId: user.id, isAdmin: newVal });
   }
 
   // Filtros
@@ -266,9 +259,6 @@ export default function AdminUsersPage() {
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <Button variant="ghost" size="icon" onClick={() => openChangePlan(user)} title="Alterar plano">
                     <Crown className="h-4 w-4 text-amber-500" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleToggleAdmin(user)} title={user.is_admin ? 'Remover admin' : 'Tornar admin'}>
-                    <Shield className={`h-4 w-4 ${user.is_admin ? 'text-red-500' : 'text-gray-400'}`} />
                   </Button>
                   <Link href={`/admin/users/${user.id}`}>
                     <Button variant="ghost" size="icon" title="Ver detalhes e alertas">
