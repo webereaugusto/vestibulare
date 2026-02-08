@@ -37,6 +37,7 @@ function SignupForm() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [redirectingToPayment, setRedirectingToPayment] = useState(false);
+  const [pendingPlan, setPendingPlan] = useState<PlanType | null>(null);
   const router = useRouter();
   const supabase = createBrowserClient();
 
@@ -60,7 +61,9 @@ function SignupForm() {
             full_name: fullName,
             phone: phone || undefined,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: isPaidPlan
+            ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/dashboard/checkout?plan=${selectedPlan}`)}`
+            : `${window.location.origin}/auth/callback`,
         },
       });
 
@@ -83,25 +86,15 @@ function SignupForm() {
 
         if (isPaidPlan) {
           setRedirectingToPayment(true);
-          try {
-            const response = await fetch('/api/payments/create-preference', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ planType: selectedPlan }),
-            });
-            const paymentData = await response.json();
-            if (paymentData.init_point) {
-              window.location.href = paymentData.init_point;
-              return;
-            }
-          } catch {
-            // Se falhar o pagamento, vai para o dashboard normalmente
-          }
+          router.push(`/dashboard/checkout?plan=${selectedPlan}`);
+          return;
         }
 
         router.push('/dashboard');
         router.refresh();
       } else {
+        // Email precisa ser confirmado
+        setPendingPlan(isPaidPlan ? selectedPlan : null);
         setSuccess(true);
       }
     } catch {
@@ -123,6 +116,20 @@ function SignupForm() {
               </span>
             </Link>
           </div>
+
+          {/* Banner do plano pendente */}
+          {pendingPlan && planInfo && (
+            <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-center">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Zap className="h-5 w-5" />
+                <span className="font-semibold">Plano {planInfo.name} reservado!</span>
+              </div>
+              <p className="text-emerald-100 text-xs">
+                Confirme seu email para ir ao pagamento
+              </p>
+            </div>
+          )}
+
           <Card>
             <CardContent className="p-8 text-center">
               <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
@@ -131,9 +138,13 @@ function SignupForm() {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Verifique seu email</h2>
-              <p className="text-gray-600 mb-6">
-                Enviamos um link de confirmação para <strong>{email}</strong>.
-                Clique no link para ativar sua conta.
+              <p className="text-gray-600 mb-2">
+                Enviamos um link de confirma\u00e7\u00e3o para <strong>{email}</strong>.
+              </p>
+              <p className="text-gray-500 text-sm mb-6">
+                {pendingPlan
+                  ? 'Ap\u00f3s confirmar, voc\u00ea ser\u00e1 direcionado para a tela de pagamento.'
+                  : 'Clique no link para ativar sua conta.'}
               </p>
               <Link href="/auth/login">
                 <Button variant="outline" className="w-full">

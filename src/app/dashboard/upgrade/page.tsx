@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Check, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/toast';
 import { createBrowserClient } from '@/lib/supabase';
 import { PLANS, formatPrice } from '@/lib/plans';
 import { Profile, PlanType } from '@/types/database';
@@ -13,7 +13,7 @@ import { Profile, PlanType } from '@/types/database';
 export default function UpgradePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
-  const { addToast } = useToast();
+  const router = useRouter();
   const supabase = createBrowserClient();
 
   useEffect(() => {
@@ -28,31 +28,10 @@ export default function UpgradePage() {
     if (data) setProfile(data as Profile);
   }
 
-  async function handleUpgrade(planType: PlanType) {
+  function handleUpgrade(planType: PlanType) {
     if (!profile || planType === 'free') return;
     setLoading(planType);
-
-    try {
-      const response = await fetch('/api/payments/create-preference', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planType }),
-      });
-
-      const data = await response.json();
-
-      if (data.error) {
-        addToast(data.error, 'error');
-        return;
-      }
-
-      // Redirecionar para checkout do Mercado Pago
-      window.location.href = data.init_point;
-    } catch {
-      addToast('Erro ao processar upgrade. Tente novamente.', 'error');
-    } finally {
-      setLoading(null);
-    }
+    router.push(`/dashboard/checkout?plan=${planType}`);
   }
 
   if (!profile) {
