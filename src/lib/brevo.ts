@@ -144,6 +144,20 @@ async function sendEmailAlert({
   return { success: true };
 }
 
+/**
+ * Formatar número de telefone para formato internacional SMS (+55XXXXXXXXXXX)
+ */
+function formatPhoneForSms(phone: string): string {
+  let cleaned = phone.replace(/\D/g, '');
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.substring(1);
+  }
+  if (!cleaned.startsWith('55')) {
+    cleaned = '55' + cleaned;
+  }
+  return '+' + cleaned;
+}
+
 async function sendSmsAlert({
   user,
   vestibular,
@@ -162,13 +176,16 @@ async function sendSmsAlert({
   }
 
   const sendSms = new Brevo.SendTransacSms();
-  sendSms.sender = 'VestibuRe';
-  sendSms.recipient = user.phone;
+  sendSms.sender = 'VestibulRe';
+  sendSms.recipient = formatPhoneForSms(user.phone);
   sendSms.content = `VestibulaRe: ${vestibular.name} - ${importantDate.event_name} ${urgencyText} (${formattedDate}). Acesse vestibulare.com.br`;
 
   await smsApi.sendTransacSms(sendSms);
   return { success: true };
 }
+
+/** Exporta utilitários SMS para uso em rotas de teste */
+export { smsApi, formatPhoneForSms };
 
 async function sendWhatsAppAlert({
   user,
