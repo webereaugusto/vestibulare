@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const smsApi = new Brevo.TransactionalSMSApi();
     smsApi.setApiKey(
       Brevo.TransactionalSMSApiApiKeys.apiKey,
-      process.env.BREVO_API_KEY!
+      (process.env.BREVO_API_KEY || '').trim()
     );
 
     const formattedPhone = formatPhoneForSms(phone);

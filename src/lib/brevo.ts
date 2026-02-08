@@ -3,16 +3,18 @@ import { Profile, ImportantDate, AlertChannel, Vestibular } from '@/types/databa
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+const brevoApiKey = (process.env.BREVO_API_KEY || '').trim();
+
 const apiInstance = new Brevo.TransactionalEmailsApi();
 apiInstance.setApiKey(
   Brevo.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY!
+  brevoApiKey
 );
 
 const smsApi = new Brevo.TransactionalSMSApi();
 smsApi.setApiKey(
   Brevo.TransactionalSMSApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY!
+  brevoApiKey
 );
 
 function getSender() {

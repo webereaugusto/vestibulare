@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const apiInstance = new Brevo.TransactionalEmailsApi();
     apiInstance.setApiKey(
       Brevo.TransactionalEmailsApiApiKeys.apiKey,
-      process.env.BREVO_API_KEY!
+      (process.env.BREVO_API_KEY || '').trim()
     );
 
     const sendSmtpEmail = new Brevo.SendSmtpEmail();

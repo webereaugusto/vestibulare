@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     switch (channel) {
       case 'email': {
         const apiInstance = new Brevo.TransactionalEmailsApi();
-        apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY!);
+        apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, (process.env.BREVO_API_KEY || '').trim());
 
         const sendSmtpEmail = new Brevo.SendSmtpEmail();
         sendSmtpEmail.to = [{ email: profile.email, name: profile.full_name || profile.email }];
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
 
       case 'sms': {
         const smsApi = new Brevo.TransactionalSMSApi();
-        smsApi.setApiKey(Brevo.TransactionalSMSApiApiKeys.apiKey, process.env.BREVO_API_KEY!);
+        smsApi.setApiKey(Brevo.TransactionalSMSApiApiKeys.apiKey, (process.env.BREVO_API_KEY || '').trim());
 
         const sendSms = new Brevo.SendTransacSms();
         sendSms.sender = 'VestibulRe';
