@@ -14,11 +14,11 @@ export const PLANS: Record<PlanType, PlanConfig> = {
   free: {
     name: 'Gratuito',
     description: 'Comece a receber alertas sem custo',
-    maxVestibulares: 3,
+    maxVestibulares: 1,
     channels: ['email'],
     price: 0,
     features: [
-      'Até 3 vestibulares',
+      'Até 1 vestibular',
       'Alertas por email',
       'Datas de inscrição e prova',
       'Painel de controle básico',
@@ -27,12 +27,12 @@ export const PLANS: Record<PlanType, PlanConfig> = {
   basic: {
     name: 'Básico',
     description: 'Para quem quer mais opções',
-    maxVestibulares: 5,
+    maxVestibulares: 10,
     channels: ['email', 'sms', 'whatsapp'],
     price: 29.90,
     popular: true,
     features: [
-      'Até 5 vestibulares',
+      'Até 10 vestibulares',
       'Alertas por email, SMS e WhatsApp',
       'Todas as datas importantes',
       'Alertas personalizados',
