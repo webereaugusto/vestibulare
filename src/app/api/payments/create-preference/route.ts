@@ -33,6 +33,10 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error('Erro ao criar preferência:', error);
-    return NextResponse.json({ error: 'Erro ao processar pagamento' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('Detalhes:', JSON.stringify(error, null, 2));
+    return NextResponse.json({ 
+      error: `Erro ao processar pagamento: ${message}` 
+    }, { status: 500 });
   }
 }

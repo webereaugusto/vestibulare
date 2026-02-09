@@ -18,35 +18,43 @@ export async function createPaymentPreference({
   const plan = PLANS[planType];
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
-  const result = await preference.create({
-    body: {
-      items: [
-        {
-          id: `plan-${planType}`,
-          title: `ZapVest - Plano ${plan.name}`,
-          description: `Assinatura anual do plano ${plan.name}`,
-          quantity: 1,
-          unit_price: plan.price,
-          currency_id: 'BRL',
-        },
-      ],
-      payer: {
-        email: userEmail,
+  // Mercado Pago rejeita notification_url com localhost/http
+  const isPublicUrl = appUrl.startsWith('https://');
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body: any = {
+    items: [
+      {
+        id: `plan-${planType}`,
+        title: `ZapVest - Plano ${plan.name}`,
+        description: `Assinatura anual do plano ${plan.name}`,
+        quantity: 1,
+        unit_price: plan.price,
+        currency_id: 'BRL',
       },
-      metadata: {
-        user_id: userId,
-        plan_type: planType,
-      },
-      external_reference: `${userId}:${planType}`,
-      back_urls: {
-        success: `${appUrl}/dashboard/upgrade/success`,
-        failure: `${appUrl}/dashboard/upgrade/failure`,
-        pending: `${appUrl}/dashboard/upgrade/pending`,
-      },
-      auto_return: 'approved',
-      notification_url: `${appUrl}/api/webhooks/mercadopago`,
+    ],
+    payer: {
+      email: userEmail,
     },
-  });
+    metadata: {
+      user_id: userId,
+      plan_type: planType,
+    },
+    external_reference: `${userId}:${planType}`,
+    back_urls: {
+      success: `${appUrl}/dashboard/upgrade/success`,
+      failure: `${appUrl}/dashboard/upgrade/failure`,
+      pending: `${appUrl}/dashboard/upgrade/pending`,
+    },
+    auto_return: 'approved',
+  };
+
+  // Apenas adicionar notification_url se for URL publica HTTPS
+  if (isPublicUrl) {
+    body.notification_url = `${appUrl}/api/webhooks/mercadopago`;
+  }
+
+  const result = await preference.create({ body });
 
   return result;
 }
