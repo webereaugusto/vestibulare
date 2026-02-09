@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast';
 import { createBrowserClient } from '@/lib/supabase';
 import { PLANS, formatPrice } from '@/lib/plans';
@@ -103,11 +102,10 @@ function CheckoutContent() {
     );
   }
 
-  // Se plano invalido, redirecionar para upgrade
   if (!plan || !planKey) {
     return (
       <div className="max-w-lg mx-auto mt-12 text-center space-y-4">
-        <p className="text-gray-600">Plano n\u00e3o encontrado.</p>
+        <p className="text-gray-600">{'Plano não encontrado.'}</p>
         <Link href="/dashboard/upgrade">
           <Button>Ver Planos</Button>
         </Link>
@@ -115,14 +113,13 @@ function CheckoutContent() {
     );
   }
 
-  // Se ja tem o plano, redirecionar
   if (profile && profile.plan_type === planKey) {
     return (
       <div className="max-w-lg mx-auto mt-12 text-center space-y-4">
         <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
           <Check className="h-8 w-8 text-emerald-600" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900">Voc\u00ea j\u00e1 possui o plano {plan.name}!</h2>
+        <h2 className="text-xl font-bold text-gray-900">{'Você já possui o plano'} {plan.name}!</h2>
         <Link href="/dashboard">
           <Button>Ir para o Painel</Button>
         </Link>
@@ -134,7 +131,6 @@ function CheckoutContent() {
 
   return (
     <div className="max-w-2xl mx-auto py-4">
-      {/* Voltar */}
       <Link
         href="/dashboard/upgrade"
         className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-6"
@@ -144,7 +140,6 @@ function CheckoutContent() {
       </Link>
 
       <div className="grid gap-6">
-        {/* Header */}
         <div className="text-center">
           <div className="inline-flex items-center gap-2 mb-3">
             <MessageCircle className="h-8 w-8 text-emerald-600" />
@@ -158,10 +153,8 @@ function CheckoutContent() {
           <p className="text-gray-500 mt-1">{plan.description}</p>
         </div>
 
-        {/* Card principal do checkout */}
         <Card className={`border-2 ${isPremium ? 'border-amber-400' : 'border-emerald-400'} shadow-lg`}>
           <CardContent className="p-0">
-            {/* Header do plano */}
             <div
               className={`p-6 text-center rounded-t-lg ${
                 isPremium
@@ -182,14 +175,13 @@ function CheckoutContent() {
                 <span className="text-white/80 text-sm">/ano</span>
               </div>
               <p className="text-white/80 text-sm mt-1">
-                Equivale a {formatPrice(plan.price / 12)}/m\u00eas
+                {'Equivale a'} {formatPrice(plan.price / 12)}{'/mês'}
               </p>
             </div>
 
-            {/* Features */}
             <div className="p-6 border-b border-gray-100">
               <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">
-                O que est\u00e1 inclu\u00eddo
+                {'O que está incluído'}
               </h3>
               <ul className="space-y-3">
                 {plan.features.map((feature) => (
@@ -205,9 +197,7 @@ function CheckoutContent() {
               </ul>
             </div>
 
-            {/* Resumo e Botao */}
             <div className="p-6 space-y-4">
-              {/* Resumo do pagamento */}
               <div className="bg-gray-50 rounded-xl p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Plano {plan.name} (anual)</span>
@@ -219,7 +209,6 @@ function CheckoutContent() {
                 </div>
               </div>
 
-              {/* Botao Pagar */}
               <Button
                 onClick={handlePayment}
                 loading={loading}
@@ -233,7 +222,6 @@ function CheckoutContent() {
                 {loading ? 'Redirecionando...' : `Pagar ${formatPrice(plan.price)}`}
               </Button>
 
-              {/* Selos de confianca */}
               <div className="flex flex-col items-center gap-2 pt-2">
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Shield className="h-4 w-4 text-emerald-500" />
@@ -241,9 +229,9 @@ function CheckoutContent() {
                 </div>
                 <div className="flex items-center gap-4 text-xs text-gray-400">
                   <span>Pix</span>
-                  <span>\u2022</span>
-                  <span>Cart\u00e3o de Cr\u00e9dito</span>
-                  <span>\u2022</span>
+                  <span>{'•'}</span>
+                  <span>{'Cartão de Crédito'}</span>
+                  <span>{'•'}</span>
                   <span>Boleto</span>
                 </div>
               </div>
@@ -251,7 +239,6 @@ function CheckoutContent() {
           </CardContent>
         </Card>
 
-        {/* Comparativo com plano atual */}
         {profile && profile.plan_type === 'free' && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
             <div className="flex items-start gap-3">
@@ -263,17 +250,16 @@ function CheckoutContent() {
                   Upgrade do plano Gratuito para {plan.name}
                 </p>
                 <p className="text-xs text-emerald-700 mt-0.5">
-                  Voc\u00ea ter\u00e1 acesso a {plan.features[0].toLowerCase()}, {plan.features[1].toLowerCase()} e muito mais.
+                  {'Você terá acesso a'} {plan.features[0].toLowerCase()}, {plan.features[1].toLowerCase()} e muito mais.
                 </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* FAQ rapido */}
         <div className="text-center space-y-2 pb-4">
           <p className="text-xs text-gray-400">
-            D\u00favidas? Entre em contato: contato@zapvest.com.br
+            {'Dúvidas? Entre em contato: contato@zapvest.com.br'}
           </p>
           <Link href="/dashboard" className="text-xs text-gray-500 hover:underline">
             Continuar com o plano gratuito

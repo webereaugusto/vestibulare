@@ -246,7 +246,7 @@ export default function AlertsPage() {
                   Plano {plan.name}
                 </Badge>
                 <span className="text-sm text-gray-500">
-                  {plan.channels.map((c) => formatChannel(c)).join(', ')} | At\u00e9 {plan.maxAlerts} alertas
+                  {plan.channels.map((c) => formatChannel(c)).join(', ')} | Até {plan.maxAlerts} alertas
                 </span>
               </div>
 
@@ -261,7 +261,7 @@ export default function AlertsPage() {
                     </span>
                     {plan.maxVestibulares < 999 && (
                       <span className="text-xs text-gray-500">
-                        {plan.maxVestibulares - activeCount} dispon\u00edveis
+                        {plan.maxVestibulares - activeCount} disponíveis
                       </span>
                     )}
                   </div>
