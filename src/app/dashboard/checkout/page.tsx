@@ -170,13 +170,22 @@ function CheckoutContent() {
                 )}
                 <span className="text-lg font-bold">Plano {plan.name}</span>
               </div>
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl font-extrabold">{formatPrice(plan.price)}</span>
-                <span className="text-white/80 text-sm">/ano</span>
-              </div>
-              <p className="text-white/80 text-sm mt-1">
-                {'Equivale a'} {formatPrice(plan.price / 12)}{'/mês'}
-              </p>
+              {plan.price > 0 && plan.name.toLowerCase().includes('pro') ? (
+                <div className="flex flex-col items-center">
+                  <div className="text-4xl font-extrabold">{formatPrice(plan.price / 12)}<span className="text-base font-medium">/mês</span></div>
+                  <div className="text-white/80 text-sm mt-1">Total {formatPrice(plan.price)} / ano à vista</div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className="text-4xl font-extrabold">{formatPrice(plan.price)}</span>
+                    <span className="text-white/80 text-sm">/ano</span>
+                  </div>
+                  <p className="text-white/80 text-sm mt-1">
+                    {'Equivale a'} {formatPrice(plan.price / 12)}{'/mês'}
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="p-6 border-b border-gray-100">

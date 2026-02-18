@@ -32,7 +32,7 @@ export const PLANS: Record<PlanType, PlanConfig> = {
     ],
   },
   basic: {
-    name: 'Básico',
+    name: 'Pro',
     description: 'Acompanhe os principais vestibulares',
     maxVestibulares: 10,
     maxAlerts: 100,

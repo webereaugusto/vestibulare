@@ -253,11 +253,23 @@ export default function HomePage() {
                     <CardTitle className="text-xl">{plan.name}</CardTitle>
                     <p className="text-sm text-gray-500">{plan.description}</p>
                     <div className="mt-4">
-                      <span className="text-4xl font-bold text-gray-900">
-                        {plan.price === 0 ? 'Gratis' : formatPrice(plan.price)}
-                      </span>
-                      {plan.price > 0 && (
-                        <span className="text-gray-500 text-sm">/ano</span>
+                      {key === 'basic' && plan.price > 0 ? (
+                        <div>
+                          <div className="text-4xl font-extrabold text-gray-900">
+                            {formatPrice(plan.price / 12)}
+                            <span className="text-lg font-medium text-gray-700">/mês</span>
+                          </div>
+                          <div className="text-sm text-gray-500 mt-1">Total {formatPrice(plan.price)} / ano à vista</div>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-4xl font-bold text-gray-900">
+                            {plan.price === 0 ? 'Gratis' : formatPrice(plan.price)}
+                          </span>
+                          {plan.price > 0 && (
+                            <span className="text-gray-500 text-sm">/ano</span>
+                          )}
+                        </>
                       )}
                     </div>
                   </CardHeader>
