@@ -17,7 +17,6 @@ export default async function SelectVestibularesPage() {
     <div className="max-w-4xl mx-auto py-8">
       <h1 className="text-2xl font-bold mb-4">Escolher vestibulares</h1>
       <p className="text-gray-600 mb-6">Selecione um ou mais vestibulares para começar a receber alertas.</p>
-      {/* @ts-expect-error Server -> Client prop */}
       <SelectionForm vestibulares={list} />
     </div>
   );

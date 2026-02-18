@@ -58,11 +58,12 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        <OnboardingSelectVestibulares />
+      <OnboardingSelectVestibulares />
       </div>
     );
   }
-\n+\n+  return (
+
+  return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
