@@ -46,8 +46,8 @@ export default function UpgradePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Plano e Assinatura</h1>
-        <p className="text-gray-500 mt-1">
-          Seu plano atual:{' '}
+        <div className="text-gray-500 mt-1">
+          <span className="mr-2">Seu plano atual:</span>
           <Badge variant={profile.plan_type === 'premium' ? 'default' : profile.plan_type === 'basic' ? 'success' : 'secondary'}>
             {PLANS[profile.plan_type].name}
           </Badge>
@@ -56,7 +56,7 @@ export default function UpgradePage() {
               (expira em {new Date(profile.plan_expires_at).toLocaleDateString('pt-BR')})
             </span>
           )}
-        </p>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
