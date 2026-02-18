@@ -8,6 +8,7 @@ import { ptBR } from 'date-fns/locale';
 import { getDaysUntil, formatEventType, formatChannel, formatStatus } from '@/lib/utils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import OnboardingSelectVestibulares from './components/OnboardingSelectVestibulares';
 
 export default async function DashboardPage() {
   const profile = (await getProfile()) as Profile;
@@ -38,8 +39,30 @@ export default async function DashboardPage() {
     .limit(5);
 
   const alertCount = userAlerts?.length || 0;
+  // If the user has no alerts yet, show a clean onboarding screen (minimal)
+  if (alertCount === 0) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Olá, {profile.full_name || 'estudante'}!
+            </h1>
+            <p className="text-gray-500 mt-1">Aqui está um resumo dos seus alertas de vestibulares.</p>
+          </div>
+          <Link href="/dashboard/alerts">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" /> Novo Alerta
+            </Button>
+          </Link>
+        </div>
 
-  return (
+        <OnboardingSelectVestibulares />
+      </div>
+    );
+  }
+\n+\n+  return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
