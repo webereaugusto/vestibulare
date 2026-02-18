@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 
 export default function SelectionForm({ vestibulares }: { vestibulares: any[] }) {
   const [selected, setSelected] = useState<string[]>([]);
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
   const supabase = createBrowserClient();
@@ -25,6 +26,16 @@ export default function SelectionForm({ vestibulares }: { vestibulares: any[] })
       if (!user) {
         // redirect to login
         router.push('/auth/login');
+        return;
+      }
+      // fetch profile to check plan limits
+      const { data: profile } = await supabase.from('profiles').select('plan_type').eq('id', user.id).single();
+      const planType = profile?.plan_type || 'free';
+
+      // if free plan and selected > 2, show friendly modal instead of proceeding
+      if (planType === 'free' && selected.length > 2) {
+        setShowLimitModal(true);
+        setSaving(false);
         return;
       }
 
@@ -78,6 +89,26 @@ export default function SelectionForm({ vestibulares }: { vestibulares: any[] })
           Salvar e Voltar
         </Button>
       </div>
+      {/* Limit modal for free plan */}
+      {showLimitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow">
+            <h3 className="text-lg font-semibold mb-2">Limite do plano Gratuito</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              O plano gratuito permite até 2 vestibulares. Você selecionou {selected.length}. Você pode:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-700 mb-4">
+              <li>Manter apenas 2 opções selecionadas (o aplicativo removerá as extras).</li>
+              <li>Fazer upgrade para um plano com mais limites.</li>
+            </ul>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowLimitModal(false)}>Cancelar</Button>
+              <Button onClick={() => { setSelected((s) => s.slice(0, 2)); setShowLimitModal(false); }}>Manter apenas 2</Button>
+              <Button onClick={() => router.push('/dashboard/upgrade')}>Ver planos</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

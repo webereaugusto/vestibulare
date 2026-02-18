@@ -39,28 +39,11 @@ export default async function DashboardPage() {
     .limit(5);
 
   const alertCount = userAlerts?.length || 0;
-  // If the user has no alerts yet, show a clean onboarding screen (minimal)
+  // If the user has no alerts yet, redirect directly to the selection page
   if (alertCount === 0) {
-    return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Olá, {profile.full_name || 'estudante'}!
-            </h1>
-            <p className="text-gray-500 mt-1">Aqui está um resumo dos seus alertas de vestibulares.</p>
-          </div>
-          <Link href="/dashboard/alerts">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" /> Novo Alerta
-            </Button>
-          </Link>
-        </div>
-
-      <OnboardingSelectVestibulares />
-      </div>
-    );
+    // server-side redirect to selection page so user lands directly on the chooser
+    const { redirect } = await import('next/navigation');
+    redirect('/dashboard/select-vestibulares');
   }
 
   return (
