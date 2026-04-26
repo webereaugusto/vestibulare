@@ -11,8 +11,6 @@ import {
   RefreshCw,
   Power,
   PowerOff,
-  CheckCircle,
-  XCircle,
   Loader2,
   AlertTriangle,
   Smartphone,
@@ -37,6 +35,22 @@ interface InstanceInfo {
   number?: string;
 }
 
+interface EvolutionQrCode {
+  base64?: string;
+  code?: string;
+  pairingCode?: string;
+}
+
+interface EvolutionApiResponse {
+  success: boolean;
+  status?: string;
+  instanceName?: string;
+  info?: InstanceInfo | null;
+  qr?: EvolutionQrCode | null;
+  result?: { success?: boolean; error?: string; exists?: boolean };
+  error?: string;
+}
+
 export default function AdminEvolutionPage() {
   const [connectionState, setConnectionState] = useState<ConnectionState | null>(null);
   const [instanceInfo, setInstanceInfo] = useState<InstanceInfo | null>(null);
@@ -51,15 +65,15 @@ export default function AdminEvolutionPage() {
   const fetchStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/evolution?action=status');
-      const data = await res.json();
+      const data = (await res.json()) as EvolutionApiResponse;
 
-      if (data.error && data.error.includes('não configurada')) {
-        setConfigError(data.error);
+      if (data.status === 'unconfigured' || (data.error && data.error.includes('não configurada'))) {
+        setConfigError(data.error ?? 'Evolution API não configurada');
         setConnectionState({ state: 'unconfigured' });
         setInstanceInfo(null);
       } else {
         setConfigError(null);
-        setConnectionState(data.state || { state: 'disconnected' });
+        setConnectionState({ state: data.status || 'closed', instance: data.instanceName });
         setInstanceInfo(data.info || null);
       }
     } catch {
@@ -78,11 +92,11 @@ export default function AdminEvolutionPage() {
     if (qrCode && connectionState?.state !== 'open') {
       const interval = setInterval(async () => {
         const res = await fetch('/api/admin/evolution?action=status');
-        const data = await res.json();
-        if (data.state?.state === 'open') {
+        const data = (await res.json()) as EvolutionApiResponse;
+        if (data.status === 'open') {
           setQrCode(null);
-          setConnectionState(data.state);
-          setInstanceInfo(data.info);
+          setConnectionState({ state: data.status, instance: data.instanceName });
+          setInstanceInfo(data.info || null);
           addToast('WhatsApp conectado com sucesso!', 'success');
         }
       }, 3000);
@@ -98,22 +112,36 @@ export default function AdminEvolutionPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, ...body }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as EvolutionApiResponse;
 
       if (!data.success && data.error) {
         addToast(data.error, 'error');
         return data;
       }
 
+      if (data.status) {
+        setConnectionState({ state: data.status, instance: data.instanceName });
+      }
+      if ('info' in data) {
+        setInstanceInfo(data.info || null);
+      }
+      if (data.qr?.base64 || data.qr?.code || data.qr?.pairingCode) {
+        setQrCode(data.qr.base64 || data.qr.code || data.qr.pairingCode || null);
+      }
+
       switch (action) {
-        case 'create':
-          addToast('Instância criada! Agora conecte escaneando o QR Code.', 'success');
-          // Auto-buscar QR code
-          await handleAction('connect');
+        case 'ensure':
+          if (data.status === 'open') {
+            addToast('WhatsApp já está conectado.', 'success');
+          } else if (data.qr) {
+            addToast('Instância pronta. Escaneie o QR Code para conectar.', 'success');
+          } else {
+            addToast('Instância configurada. Gere um novo QR Code se necessário.', 'success');
+          }
           break;
         case 'connect':
-          if (data.qr?.base64 || data.qr?.code) {
-            setQrCode(data.qr.base64 || data.qr.code);
+          if (data.qr) {
+            addToast('QR Code gerado.', 'success');
           }
           break;
         case 'logout':
@@ -138,10 +166,16 @@ export default function AdminEvolutionPage() {
             addToast(`Falha no envio: ${data.result?.error || data.error}`, 'error');
           }
           break;
+        case 'check-number':
+          addToast(
+            data.result?.exists ? 'Número encontrado no WhatsApp.' : 'Número não encontrado no WhatsApp.',
+            data.result?.exists ? 'success' : 'error'
+          );
+          break;
       }
 
       return data;
-    } catch (err) {
+    } catch {
       addToast('Erro na operação.', 'error');
       return null;
     } finally {
@@ -265,12 +299,12 @@ EVOLUTION_INSTANCE_NAME=zapvest`}
               {!isConnected && (
                 <>
                   <Button
-                    onClick={() => handleAction('create')}
-                    loading={actionLoading === 'create'}
+                    onClick={() => handleAction('ensure')}
+                    loading={actionLoading === 'ensure'}
                     variant="default"
                   >
                     <Power className="h-4 w-4 mr-2" />
-                    Criar Instância
+                    Configurar WhatsApp
                   </Button>
                   <Button
                     onClick={() => handleAction('connect')}

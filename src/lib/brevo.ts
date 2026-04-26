@@ -215,11 +215,17 @@ async function sendWhatsAppAlert({
   }
 
   // Usa Evolution API para envio de WhatsApp
-  const { sendTextMessage, buildAlertMessage, isEvolutionReady } = await import('@/lib/evolution');
+  const { sendTextMessage, buildAlertMessage, ensureZapVestInstance } = await import('@/lib/evolution');
 
-  const ready = await isEvolutionReady();
-  if (!ready) {
-    return { success: false, error: 'Evolution API não está conectada. Configure em Admin > WhatsApp.' };
+  const evolutionStatus = await ensureZapVestInstance({
+    createIfMissing: false,
+    includeQr: false,
+  });
+  if (evolutionStatus.status !== 'open') {
+    return {
+      success: false,
+      error: `Evolution API não está conectada (status: ${evolutionStatus.status}). Configure em Admin > WhatsApp.`,
+    };
   }
 
   const message = buildAlertMessage({

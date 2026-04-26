@@ -5,9 +5,37 @@
  * Usado para envio de mensagens WhatsApp via instância própria.
  */
 
+import { createServiceClient } from '@/lib/supabase';
+
 const getBaseUrl = () => process.env.EVOLUTION_API_URL || '';
 const getApiKey = () => process.env.EVOLUTION_API_KEY || '';
-const getInstanceName = () => process.env.EVOLUTION_INSTANCE_NAME || 'zapvest';
+export const getInstanceName = () => process.env.EVOLUTION_INSTANCE_NAME || 'zapvest';
+
+export type EvolutionOperationalStatus =
+  | 'unconfigured'
+  | 'missing'
+  | 'created'
+  | 'connecting'
+  | 'open'
+  | 'closed'
+  | 'error';
+
+export interface EvolutionQrCode {
+  base64?: string;
+  code?: string;
+  pairingCode?: string;
+  generatedAt: string;
+  raw: unknown;
+}
+
+export interface EvolutionInstanceStatus {
+  success: boolean;
+  status: EvolutionOperationalStatus;
+  instanceName: string;
+  info: InstanceInfo | null;
+  qr?: EvolutionQrCode | null;
+  error?: string;
+}
 
 function headers() {
   return {
@@ -36,6 +64,97 @@ async function request(path: string, options?: RequestInit) {
   return data;
 }
 
+function normalizeConnectionState(state?: string | null): EvolutionOperationalStatus {
+  const normalized = (state || '').toLowerCase();
+
+  if (['open', 'connected', 'connect'].includes(normalized)) return 'open';
+  if (['connecting', 'qrcode', 'qr', 'pairing'].includes(normalized)) return 'connecting';
+  if (['close', 'closed', 'disconnected', 'disconnect', 'logout'].includes(normalized)) return 'closed';
+  if (['created', 'initialized'].includes(normalized)) return 'created';
+
+  return normalized ? 'closed' : 'missing';
+}
+
+function isAlreadyExistsError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  return message.includes('already') || message.includes('exist') || message.includes('já existe');
+}
+
+export function extractQrCode(data: unknown): EvolutionQrCode | null {
+  if (!data) return null;
+
+  if (typeof data === 'string') {
+    return {
+      code: data,
+      generatedAt: new Date().toISOString(),
+      raw: data,
+    };
+  }
+
+  if (typeof data !== 'object') return null;
+
+  const record = data as Record<string, unknown>;
+  const qrcode = typeof record.qrcode === 'object' && record.qrcode
+    ? record.qrcode as Record<string, unknown>
+    : {};
+
+  const base64 = [
+    record.base64,
+    record.qr,
+    qrcode.base64,
+    qrcode.image,
+  ].find((value): value is string => typeof value === 'string' && value.length > 0);
+
+  const code = [
+    record.code,
+    record.qrCode,
+    qrcode.code,
+    qrcode.qrCode,
+  ].find((value): value is string => typeof value === 'string' && value.length > 0);
+
+  const pairingCode = [
+    record.pairingCode,
+    qrcode.pairingCode,
+  ].find((value): value is string => typeof value === 'string' && value.length > 0);
+
+  if (!base64 && !code && !pairingCode) return null;
+
+  return {
+    base64,
+    code,
+    pairingCode,
+    generatedAt: new Date().toISOString(),
+    raw: data,
+  };
+}
+
+async function saveInstanceStatus(params: {
+  instanceName: string;
+  status: EvolutionOperationalStatus;
+  info?: InstanceInfo | null;
+  qr?: EvolutionQrCode | null;
+  error?: string | null;
+}) {
+  try {
+    const supabase = createServiceClient();
+    const now = new Date().toISOString();
+
+    await supabase.from('whatsapp_instances').upsert({
+      instance_name: params.instanceName,
+      state: params.status,
+      phone: params.info?.number ?? null,
+      profile_name: params.info?.profileName ?? null,
+      profile_picture_url: params.info?.profilePictureUrl ?? null,
+      last_qr_at: params.qr ? params.qr.generatedAt : undefined,
+      last_connected_at: params.status === 'open' ? now : undefined,
+      last_error: params.error ?? null,
+      updated_at: now,
+    }, { onConflict: 'instance_name' });
+  } catch {
+    // A tabela pode ainda não existir em ambientes que não executaram o setup atualizado.
+  }
+}
+
 // ============================================
 // Gerenciamento de Instância
 // ============================================
@@ -53,7 +172,7 @@ export interface InstanceInfo {
  */
 export async function createInstance(instanceName?: string) {
   const name = instanceName || getInstanceName();
-  return request('/instance/create', {
+  const result = await request('/instance/create', {
     method: 'POST',
     body: JSON.stringify({
       instanceName: name,
@@ -67,14 +186,31 @@ export async function createInstance(instanceName?: string) {
       readStatus: false,
     }),
   });
+
+  await saveInstanceStatus({
+    instanceName: name,
+    status: 'created',
+    qr: extractQrCode(result),
+  });
+
+  return result;
 }
 
 /**
  * Buscar QR Code para conectar
  */
-export async function getQrCode(instanceName?: string) {
+export async function getQrCode(instanceName?: string): Promise<EvolutionQrCode | null> {
   const name = instanceName || getInstanceName();
-  return request(`/instance/connect/${name}`, { method: 'GET' });
+  const result = await request(`/instance/connect/${name}`, { method: 'GET' });
+  const qr = extractQrCode(result);
+
+  await saveInstanceStatus({
+    instanceName: name,
+    status: qr ? 'connecting' : 'closed',
+    qr,
+  });
+
+  return qr;
 }
 
 /**
@@ -88,7 +224,7 @@ export async function getConnectionState(instanceName?: string): Promise<{
   const data = await request(`/instance/connectionState/${name}`, { method: 'GET' });
   // Evolution API retorna { instance: { instanceName, state } }
   return {
-    state: data?.instance?.state || data?.state || 'unknown',
+    state: normalizeConnectionState(data?.instance?.state || data?.state),
     instance: data?.instance?.instanceName || name,
   };
 }
@@ -107,7 +243,7 @@ export async function fetchInstanceInfo(instanceName?: string): Promise<Instance
       const inst = instances[0];
       return {
         instanceName: inst.name || inst.instance?.instanceName || name,
-        state: inst.connectionStatus || inst.instance?.state || 'unknown',
+        state: normalizeConnectionState(inst.connectionStatus || inst.instance?.state),
         profileName: inst.profileName || inst.instance?.profileName || undefined,
         profilePictureUrl: inst.profilePicUrl || inst.instance?.profilePicUrl || undefined,
         number: inst.number || inst.ownerJid?.replace('@s.whatsapp.net', '') || inst.instance?.owner || undefined,
@@ -124,7 +260,9 @@ export async function fetchInstanceInfo(instanceName?: string): Promise<Instance
  */
 export async function logoutInstance(instanceName?: string) {
   const name = instanceName || getInstanceName();
-  return request(`/instance/logout/${name}`, { method: 'DELETE' });
+  const result = await request(`/instance/logout/${name}`, { method: 'DELETE' });
+  await saveInstanceStatus({ instanceName: name, status: 'closed' });
+  return result;
 }
 
 /**
@@ -132,7 +270,9 @@ export async function logoutInstance(instanceName?: string) {
  */
 export async function deleteInstance(instanceName?: string) {
   const name = instanceName || getInstanceName();
-  return request(`/instance/delete/${name}`, { method: 'DELETE' });
+  const result = await request(`/instance/delete/${name}`, { method: 'DELETE' });
+  await saveInstanceStatus({ instanceName: name, status: 'missing' });
+  return result;
 }
 
 /**
@@ -140,7 +280,121 @@ export async function deleteInstance(instanceName?: string) {
  */
 export async function restartInstance(instanceName?: string) {
   const name = instanceName || getInstanceName();
-  return request(`/instance/restart/${name}`, { method: 'PUT' });
+  const result = await request(`/instance/restart/${name}`, { method: 'PUT' });
+  await saveInstanceStatus({ instanceName: name, status: 'connecting' });
+  return result;
+}
+
+export async function ensureZapVestInstance(options?: {
+  createIfMissing?: boolean;
+  includeQr?: boolean;
+}): Promise<EvolutionInstanceStatus> {
+  const instanceName = getInstanceName();
+  const createIfMissing = options?.createIfMissing ?? true;
+  const includeQr = options?.includeQr ?? true;
+
+  if (!getBaseUrl() || !getApiKey()) {
+    const status: EvolutionInstanceStatus = {
+      success: false,
+      status: 'unconfigured',
+      instanceName,
+      info: null,
+      error: !getBaseUrl()
+        ? 'EVOLUTION_API_URL não configurada'
+        : 'EVOLUTION_API_KEY não configurada',
+    };
+    await saveInstanceStatus({
+      instanceName,
+      status: status.status,
+      error: status.error,
+    });
+    return status;
+  }
+
+  try {
+    let info = await fetchInstanceInfo(instanceName);
+    let qr: EvolutionQrCode | null = null;
+
+    if (!info && createIfMissing) {
+      try {
+        const createResult = await createInstance(instanceName);
+        qr = extractQrCode(createResult);
+      } catch (error) {
+        if (!isAlreadyExistsError(error)) {
+          throw error;
+        }
+      }
+
+      info = await fetchInstanceInfo(instanceName);
+    }
+
+    if (!info && !createIfMissing) {
+      const status: EvolutionInstanceStatus = {
+        success: true,
+        status: 'missing',
+        instanceName,
+        info: null,
+      };
+      await saveInstanceStatus({ instanceName, status: 'missing' });
+      return status;
+    }
+
+    let status: EvolutionOperationalStatus = info?.state
+      ? normalizeConnectionState(info.state)
+      : 'created';
+
+    try {
+      const connection = await getConnectionState(instanceName);
+      status = normalizeConnectionState(connection.state);
+    } catch (error) {
+      if (!info && !createIfMissing) {
+        status = 'missing';
+      } else if (!isAlreadyExistsError(error)) {
+        status = info ? normalizeConnectionState(info.state) : 'created';
+      }
+    }
+
+    if (status !== 'open' && includeQr) {
+      qr = qr || await getQrCode(instanceName);
+      if (qr) status = 'connecting';
+    }
+
+    info = await fetchInstanceInfo(instanceName) || info;
+
+    const result: EvolutionInstanceStatus = {
+      success: true,
+      status,
+      instanceName,
+      info,
+      qr,
+    };
+
+    await saveInstanceStatus({
+      instanceName,
+      status,
+      info,
+      qr,
+    });
+
+    return result;
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Erro desconhecido';
+    const status: EvolutionInstanceStatus = {
+      success: false,
+      status: 'error',
+      instanceName,
+      info: null,
+      error: msg,
+    };
+
+    await saveInstanceStatus({
+      instanceName,
+      status: 'error',
+      error: msg,
+    });
+
+    return status;
+  }
 }
 
 // ============================================
@@ -231,8 +485,11 @@ export async function isEvolutionReady(): Promise<boolean> {
   if (!getBaseUrl() || !getApiKey()) return false;
 
   try {
-    const state = await getConnectionState();
-    return state.state === 'open';
+    const status = await ensureZapVestInstance({
+      createIfMissing: false,
+      includeQr: false,
+    });
+    return status.status === 'open';
   } catch {
     return false;
   }

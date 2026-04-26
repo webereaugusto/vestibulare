@@ -4,6 +4,7 @@ export type AlertChannel = 'email' | 'sms' | 'whatsapp';
 export type AlertStatus = 'sent' | 'failed' | 'pending';
 export type SubscriptionStatus = 'pending' | 'approved' | 'rejected' | 'refunded';
 export type DateSource = 'manual' | 'scraped';
+export type WhatsappInstanceState = 'unconfigured' | 'missing' | 'created' | 'connecting' | 'open' | 'closed' | 'error';
 
 export interface Profile {
   id: string;
@@ -87,4 +88,18 @@ export interface Subscription {
   status: SubscriptionStatus;
   expires_at: string | null;
   created_at: string;
+}
+
+export interface WhatsappInstance {
+  id: string;
+  instance_name: string;
+  state: WhatsappInstanceState;
+  phone: string | null;
+  profile_name: string | null;
+  profile_picture_url: string | null;
+  last_qr_at: string | null;
+  last_connected_at: string | null;
+  last_error: string | null;
+  created_at: string;
+  updated_at: string;
 }

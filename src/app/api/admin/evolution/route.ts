@@ -2,15 +2,15 @@ import { NextResponse } from 'next/server';
 import { getProfile } from '@/lib/supabase-server';
 import { Profile } from '@/types/database';
 import {
-  createInstance,
   getQrCode,
-  getConnectionState,
-  fetchInstanceInfo,
+  ensureZapVestInstance,
   logoutInstance,
   deleteInstance,
   restartInstance,
   sendTextMessage,
   checkWhatsAppNumber,
+  getInstanceName,
+  type EvolutionInstanceStatus,
 } from '@/lib/evolution';
 
 async function requireAdmin() {
@@ -19,6 +19,17 @@ async function requireAdmin() {
     return null;
   }
   return profile;
+}
+
+function jsonStatus(status: EvolutionInstanceStatus, init?: ResponseInit) {
+  return NextResponse.json({
+    success: status.success,
+    status: status.status,
+    instanceName: status.instanceName,
+    info: status.info,
+    qr: status.qr ?? null,
+    error: status.error,
+  }, init);
 }
 
 // GET - Buscar status da instância
@@ -32,35 +43,42 @@ export async function GET(req: Request) {
   try {
     switch (action) {
       case 'status': {
-        const state = await getConnectionState();
-        const info = await fetchInstanceInfo();
-        return NextResponse.json({ success: true, state, info });
+        const status = await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: false,
+        });
+        return jsonStatus(status);
       }
 
       case 'qrcode': {
         const qr = await getQrCode();
-        return NextResponse.json({ success: true, qr });
+        const status = await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: false,
+        });
+        return NextResponse.json({
+          success: true,
+          status: qr ? 'connecting' : status.status,
+          instanceName: getInstanceName(),
+          info: status.info,
+          qr,
+          error: status.error,
+        });
       }
 
       case 'info': {
-        const info = await fetchInstanceInfo();
-        return NextResponse.json({ success: true, info });
+        const status = await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: false,
+        });
+        return jsonStatus(status);
       }
 
       default:
-        // Retorna status geral
-        try {
-          const state = await getConnectionState();
-          const info = await fetchInstanceInfo();
-          return NextResponse.json({ success: true, state, info });
-        } catch (error) {
-          return NextResponse.json({
-            success: true,
-            state: { state: 'disconnected' },
-            info: null,
-            error: error instanceof Error ? error.message : 'Instância não encontrada',
-          });
-        }
+        return jsonStatus(await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: false,
+        }));
     }
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -78,46 +96,97 @@ export async function POST(req: Request) {
     const { action, phone, message } = body;
 
     switch (action) {
+      case 'ensure': {
+        const status = await ensureZapVestInstance({
+          createIfMissing: true,
+          includeQr: true,
+        });
+        return jsonStatus(status, { status: status.success ? 200 : 500 });
+      }
+
       case 'create': {
-        const result = await createInstance();
-        return NextResponse.json({ success: true, result });
+        const status = await ensureZapVestInstance({
+          createIfMissing: true,
+          includeQr: true,
+        });
+        return jsonStatus(status, { status: status.success ? 200 : 500 });
       }
 
       case 'connect': {
-        const qr = await getQrCode();
-        return NextResponse.json({ success: true, qr });
+        const status = await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: true,
+        });
+        return jsonStatus(status, { status: status.success ? 200 : 500 });
       }
 
       case 'logout': {
         const result = await logoutInstance();
-        return NextResponse.json({ success: true, result });
+        const status = await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: false,
+        });
+        return NextResponse.json({ ...status, result, success: true });
       }
 
       case 'restart': {
         const result = await restartInstance();
-        return NextResponse.json({ success: true, result });
+        const status = await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: false,
+        });
+        return NextResponse.json({ ...status, result, success: true });
       }
 
       case 'delete': {
         const result = await deleteInstance();
-        return NextResponse.json({ success: true, result });
+        return NextResponse.json({
+          success: true,
+          status: 'missing',
+          instanceName: getInstanceName(),
+          info: null,
+          qr: null,
+          result,
+        });
       }
 
       case 'test-message': {
-        if (!phone) {
+        if (typeof phone !== 'string' || !phone.trim()) {
           return NextResponse.json({ error: 'Número de telefone obrigatório' }, { status: 400 });
         }
-        const text = message || '✅ Teste ZapVest - WhatsApp funcionando!\n\n🎓 Se você recebeu esta mensagem, a integração com Evolution API está configurada corretamente.';
+        const status = await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: false,
+        });
+        if (status.status !== 'open') {
+          return NextResponse.json({
+            ...status,
+            success: false,
+            error: 'WhatsApp ainda não está conectado.',
+          }, { status: 409 });
+        }
+        const text = typeof message === 'string' && message.trim()
+          ? message.trim()
+          : '✅ Teste ZapVest - WhatsApp funcionando!\n\n🎓 Se você recebeu esta mensagem, a integração com Evolution API está configurada corretamente.';
         const result = await sendTextMessage(phone, text);
-        return NextResponse.json({ success: result.success, result });
+        return NextResponse.json({
+          ...status,
+          success: result.success,
+          result,
+          error: result.error,
+        }, { status: result.success ? 200 : 500 });
       }
 
       case 'check-number': {
-        if (!phone) {
+        if (typeof phone !== 'string' || !phone.trim()) {
           return NextResponse.json({ error: 'Número de telefone obrigatório' }, { status: 400 });
         }
         const result = await checkWhatsAppNumber(phone);
-        return NextResponse.json({ success: true, result });
+        const status = await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: false,
+        });
+        return NextResponse.json({ ...status, success: true, result });
       }
 
       default:

@@ -55,8 +55,6 @@ export async function POST(req: Request) {
     }
 
     // Enviar código pelo canal escolhido
-    const message = `ZapVest - Seu codigo de verificacao: ${code}\n\nEste codigo expira em 2 horas.`;
-
     switch (channel) {
       case 'email': {
         const apiInstance = new Brevo.TransactionalEmailsApi();
@@ -104,10 +102,15 @@ export async function POST(req: Request) {
       }
 
       case 'whatsapp': {
-        const { sendTextMessage, isEvolutionReady } = await import('@/lib/evolution');
-        const ready = await isEvolutionReady();
-        if (!ready) {
-          return NextResponse.json({ error: 'WhatsApp nao esta conectado. Contate o suporte.' }, { status: 503 });
+        const { sendTextMessage, ensureZapVestInstance } = await import('@/lib/evolution');
+        const evolutionStatus = await ensureZapVestInstance({
+          createIfMissing: false,
+          includeQr: false,
+        });
+        if (evolutionStatus.status !== 'open') {
+          return NextResponse.json({
+            error: `WhatsApp nao esta conectado (status: ${evolutionStatus.status}). Contate o suporte.`,
+          }, { status: 503 });
         }
         const whatsappMsg = `*ZapVest - Verificacao de WhatsApp*\n\nSeu codigo de verificacao: *${code}*\n\nEste codigo expira em 2 horas.`;
         const result = await sendTextMessage(profile.phone!, whatsappMsg);

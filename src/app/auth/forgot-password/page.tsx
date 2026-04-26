@@ -2,45 +2,36 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createBrowserClient } from '@/lib/supabase';
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const supabase = createBrowserClient();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setSuccess(false);
     setLoading(true);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent('/auth/reset-password')}`,
       });
 
-      if (authError) {
-        if (authError.message === 'Invalid login credentials') {
-          setError('Email ou senha incorretos.');
-        } else if (authError.message === 'Email not confirmed') {
-          setError('Email ainda não confirmado. Verifique sua caixa de entrada (e spam) e clique no link de confirmação.');
-        } else {
-          setError(authError.message);
-        }
+      if (resetError) {
+        setError(resetError.message);
         return;
       }
 
-      router.push('/dashboard');
-      router.refresh();
+      setSuccess(true);
     } catch {
       setError('Ocorreu um erro. Tente novamente.');
     } finally {
@@ -62,14 +53,22 @@ export default function LoginPage() {
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Bem-vindo de volta</CardTitle>
-            <CardDescription>Entre na sua conta para acessar seus alertas</CardDescription>
+            <CardTitle className="text-2xl">Recuperar senha</CardTitle>
+            <CardDescription>
+              Informe seu email para receber o link de redefinicao.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
                   {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
+                  Se este email estiver cadastrado, enviaremos um link para redefinir sua senha.
                 </div>
               )}
 
@@ -83,31 +82,15 @@ export default function LoginPage() {
                 required
               />
 
-              <Input
-                id="password"
-                label="Senha"
-                type="password"
-                placeholder="Sua senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-
-              <div className="text-right">
-                <Link href="/auth/forgot-password" className="text-sm text-emerald-600 hover:underline font-medium">
-                  Esqueci a senha
-                </Link>
-              </div>
-
               <Button type="submit" className="w-full" loading={loading}>
-                Entrar
+                Enviar link de recuperacao
               </Button>
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-600">
-              Não tem uma conta?{' '}
-              <Link href="/auth/signup" className="text-emerald-600 hover:underline font-medium">
-                Criar conta grátis
+              Lembrou sua senha?{' '}
+              <Link href="/auth/login" className="text-emerald-600 hover:underline font-medium">
+                Entrar
               </Link>
             </div>
           </CardContent>

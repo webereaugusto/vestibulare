@@ -101,6 +101,22 @@ CREATE TABLE IF NOT EXISTS verification_codes (
 CREATE INDEX IF NOT EXISTS idx_verification_codes_user ON verification_codes(user_id);
 CREATE INDEX IF NOT EXISTS idx_verification_codes_lookup ON verification_codes(user_id, channel, code);
 
+-- Status operacional da instância oficial de WhatsApp/Evolution
+CREATE TABLE IF NOT EXISTS whatsapp_instances (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  instance_name text UNIQUE NOT NULL,
+  state text NOT NULL CHECK (state IN ('unconfigured', 'missing', 'created', 'connecting', 'open', 'closed', 'error')) DEFAULT 'missing',
+  phone text,
+  profile_name text,
+  profile_picture_url text,
+  last_qr_at timestamp with time zone,
+  last_connected_at timestamp with time zone,
+  last_error text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_instances_state ON whatsapp_instances(state);
+
 -- =============================================
 -- Índices para performance
 -- =============================================
@@ -123,6 +139,7 @@ alter table important_dates enable row level security;
 alter table user_alerts enable row level security;
 alter table alert_logs enable row level security;
 alter table subscriptions enable row level security;
+alter table whatsapp_instances enable row level security;
 
 -- Policies para profiles
 create policy "Users can view own profile" on profiles
@@ -165,6 +182,16 @@ create policy "Users can view own alert logs" on alert_logs
 -- Policies para subscriptions
 create policy "Users can view own subscriptions" on subscriptions
   for select using (auth.uid() = user_id);
+
+-- Policies para whatsapp_instances
+create policy "Admins can view whatsapp instances" on whatsapp_instances
+  for select using (
+    exists (select 1 from profiles where id = auth.uid() and is_admin = true)
+  );
+create policy "Admins can manage whatsapp instances" on whatsapp_instances
+  for all using (
+    exists (select 1 from profiles where id = auth.uid() and is_admin = true)
+  );
 
 -- =============================================
 -- Functions e Triggers

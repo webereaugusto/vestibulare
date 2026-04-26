@@ -1,7 +1,7 @@
 $envVars = @{
-    "EVOLUTION_API_URL" = "https://vollpilates-evolution.wehlqk.easypanel.host"
-    "EVOLUTION_API_KEY" = "D011D8D0437D-473E-A040-285429ACE89D"
-    "EVOLUTION_INSTANCE_NAME" = "vesti2026"
+    "EVOLUTION_API_URL" = "https://sua-evolution-api.example.com"
+    "EVOLUTION_API_KEY" = "sua-chave-da-evolution"
+    "EVOLUTION_INSTANCE_NAME" = "zapvest"
 }
 
 foreach ($key in $envVars.Keys) {

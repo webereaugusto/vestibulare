@@ -6,13 +6,14 @@ import { useRouter } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createBrowserClient } from '@/lib/supabase';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('');
+export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createBrowserClient();
@@ -20,27 +21,35 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setSuccess(false);
+
+    if (password.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('As senhas nao conferem.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
+      const { error: updateError } = await supabase.auth.updateUser({
         password,
       });
 
-      if (authError) {
-        if (authError.message === 'Invalid login credentials') {
-          setError('Email ou senha incorretos.');
-        } else if (authError.message === 'Email not confirmed') {
-          setError('Email ainda não confirmado. Verifique sua caixa de entrada (e spam) e clique no link de confirmação.');
-        } else {
-          setError(authError.message);
-        }
+      if (updateError) {
+        setError(updateError.message);
         return;
       }
 
-      router.push('/dashboard');
-      router.refresh();
+      setSuccess(true);
+      setTimeout(() => {
+        router.push('/dashboard');
+        router.refresh();
+      }, 1200);
     } catch {
       setError('Ocorreu um erro. Tente novamente.');
     } finally {
@@ -62,8 +71,8 @@ export default function LoginPage() {
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Bem-vindo de volta</CardTitle>
-            <CardDescription>Entre na sua conta para acessar seus alertas</CardDescription>
+            <CardTitle className="text-2xl">Nova senha</CardTitle>
+            <CardDescription>Crie uma nova senha para acessar sua conta.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -73,43 +82,38 @@ export default function LoginPage() {
                 </div>
               )}
 
-              <Input
-                id="email"
-                label="Email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              {success && (
+                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
+                  Senha atualizada com sucesso. Redirecionando...
+                </div>
+              )}
 
               <Input
                 id="password"
-                label="Senha"
+                label="Nova senha"
                 type="password"
-                placeholder="Sua senha"
+                placeholder="Minimo 6 caracteres"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
               />
 
-              <div className="text-right">
-                <Link href="/auth/forgot-password" className="text-sm text-emerald-600 hover:underline font-medium">
-                  Esqueci a senha
-                </Link>
-              </div>
+              <Input
+                id="confirmPassword"
+                label="Confirmar nova senha"
+                type="password"
+                placeholder="Digite a senha novamente"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+              />
 
               <Button type="submit" className="w-full" loading={loading}>
-                Entrar
+                Salvar nova senha
               </Button>
             </form>
-
-            <div className="mt-6 text-center text-sm text-gray-600">
-              Não tem uma conta?{' '}
-              <Link href="/auth/signup" className="text-emerald-600 hover:underline font-medium">
-                Criar conta grátis
-              </Link>
-            </div>
           </CardContent>
         </Card>
       </div>
