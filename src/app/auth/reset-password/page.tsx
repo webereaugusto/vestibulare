@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
@@ -15,13 +15,62 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [sessionReady, setSessionReady] = useState(false);
   const router = useRouter();
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
+
+  useEffect(() => {
+    async function prepareRecoverySession() {
+      try {
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get('code');
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) throw exchangeError;
+          window.history.replaceState(null, '', '/auth/reset-password');
+        } else if (accessToken && refreshToken) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (sessionError) throw sessionError;
+          window.history.replaceState(null, '', '/auth/reset-password');
+        }
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          setError('Link inválido ou expirado. Solicite um novo link em "Esqueci a senha".');
+          return;
+        }
+
+        setSessionReady(true);
+      } catch {
+        setError('Não foi possível validar o link de recuperação. Solicite um novo link.');
+      } finally {
+        setCheckingSession(false);
+      }
+    }
+
+    prepareRecoverySession();
+  }, [supabase]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setSuccess(false);
+
+    if (!sessionReady) {
+      setError('Abra o link de recuperação enviado por email antes de salvar a nova senha.');
+      return;
+    }
 
     if (password.length < 6) {
       setError('A senha deve ter pelo menos 6 caracteres.');
@@ -41,7 +90,11 @@ export default function ResetPasswordPage() {
       });
 
       if (updateError) {
-        setError(updateError.message);
+        setError(
+          updateError.message.includes('Auth session missing')
+            ? 'Sessão de recuperação expirada. Solicite um novo link em "Esqueci a senha".'
+            : updateError.message
+        );
         return;
       }
 
@@ -82,6 +135,12 @@ export default function ResetPasswordPage() {
                 </div>
               )}
 
+              {checkingSession && (
+                <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
+                  Validando link de recuperação...
+                </div>
+              )}
+
               {success && (
                 <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
                   Senha atualizada com sucesso. Redirecionando...
@@ -110,7 +169,7 @@ export default function ResetPasswordPage() {
                 minLength={6}
               />
 
-              <Button type="submit" className="w-full" loading={loading}>
+              <Button type="submit" className="w-full" loading={loading} disabled={checkingSession || !sessionReady || success}>
                 Salvar nova senha
               </Button>
             </form>

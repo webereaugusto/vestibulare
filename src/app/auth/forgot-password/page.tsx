@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,16 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const supabase = createBrowserClient();
+  const supabase = useMemo(() => createBrowserClient(), []);
+
+  function getResetRedirectUrl() {
+    const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '');
+    const origin = configuredUrl && !configuredUrl.includes('localhost')
+      ? configuredUrl
+      : window.location.origin;
+
+    return `${origin}/auth/reset-password`;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,7 +32,7 @@ export default function ForgotPasswordPage() {
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent('/auth/reset-password')}`,
+        redirectTo: getResetRedirectUrl(),
       });
 
       if (resetError) {
