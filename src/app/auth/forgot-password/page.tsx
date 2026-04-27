@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
   const supabase = createBrowserClient();
 
   function getResetRedirectUrl() {
-    return `${window.location.origin}/auth/reset-password`;
+    return `${window.location.origin}/auth/callback?next=/auth/reset-password`;
   }
 
   async function handleSubmit(e: React.FormEvent) {

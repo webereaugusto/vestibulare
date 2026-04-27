@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MessageCircle } from 'lucide-react';
@@ -18,49 +18,30 @@ export default function ResetPasswordPage() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [sessionReady, setSessionReady] = useState(false);
   const router = useRouter();
-  const supabase = useMemo(() => createBrowserClient(), []);
+  const supabase = createBrowserClient();
 
   useEffect(() => {
-    async function prepareRecoverySession() {
+    async function checkSession() {
       try {
-        const url = new URL(window.location.href);
-        const code = url.searchParams.get('code');
-        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-
-        if (code) {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) throw exchangeError;
-          window.history.replaceState(null, '', '/auth/reset-password');
-        } else if (accessToken && refreshToken) {
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          });
-          if (sessionError) throw sessionError;
-          window.history.replaceState(null, '', '/auth/reset-password');
-        }
-
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
-        if (!session) {
+        if (session) {
+          setSessionReady(true);
+        } else {
           setError('Link inválido ou expirado. Solicite um novo link em "Esqueci a senha".');
-          return;
         }
-
-        setSessionReady(true);
       } catch {
-        setError('Não foi possível validar o link de recuperação. Solicite um novo link.');
+        setError('Não foi possível validar a sessão. Solicite um novo link.');
       } finally {
         setCheckingSession(false);
       }
     }
 
-    prepareRecoverySession();
-  }, [supabase]);
+    checkSession();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,21 +59,19 @@ export default function ResetPasswordPage() {
     }
 
     if (password !== confirmPassword) {
-      setError('As senhas nao conferem.');
+      setError('As senhas não conferem.');
       return;
     }
 
     setLoading(true);
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({
-        password,
-      });
+      const { error: updateError } = await supabase.auth.updateUser({ password });
 
       if (updateError) {
         setError(
           updateError.message.includes('Auth session missing')
-            ? 'Sessão de recuperação expirada. Solicite um novo link em "Esqueci a senha".'
+            ? 'Sessão expirada. Solicite um novo link em "Esqueci a senha".'
             : updateError.message
         );
         return;
@@ -131,7 +110,12 @@ export default function ResetPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                  {error}
+                  {error}{' '}
+                  {!sessionReady && !checkingSession && (
+                    <Link href="/auth/forgot-password" className="underline font-medium">
+                      Solicitar novo link
+                    </Link>
+                  )}
                 </div>
               )}
 
@@ -151,7 +135,7 @@ export default function ResetPasswordPage() {
                 id="password"
                 label="Nova senha"
                 type="password"
-                placeholder="Minimo 6 caracteres"
+                placeholder="Mínimo 6 caracteres"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -169,7 +153,12 @@ export default function ResetPasswordPage() {
                 minLength={6}
               />
 
-              <Button type="submit" className="w-full" loading={loading} disabled={checkingSession || !sessionReady || success}>
+              <Button
+                type="submit"
+                className="w-full"
+                loading={loading}
+                disabled={checkingSession || !sessionReady || success}
+              >
                 Salvar nova senha
               </Button>
             </form>
