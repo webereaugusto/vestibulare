@@ -213,7 +213,7 @@ export default function AdminEvolutionPage() {
                 <p className="font-medium text-amber-800 mb-1">Evolution API não configurada</p>
                 <p className="text-amber-700 mb-2">{configError}</p>
                 <p className="text-amber-700">
-                  Adicione as variáveis no <code className="bg-amber-100 px-1 rounded">.env.local</code>:
+                  Adicione as variáveis de ambiente no servidor da aplicação:
                 </p>
                 <pre className="mt-2 bg-amber-100 p-3 rounded-lg text-xs text-amber-900 overflow-x-auto">
 {`EVOLUTION_API_URL=http://localhost:8080
@@ -457,22 +457,22 @@ EVOLUTION_INSTANCE_NAME=zapvest`}
         <CardHeader>
           <CardTitle>Variáveis de Ambiente</CardTitle>
           <CardDescription>
-            Configuração necessária no <code>.env.local</code> para a integração funcionar.
+            O app usa essas credenciais para criar instância, gerar QR Code e enviar mensagens pela API.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {[
-              { key: 'EVOLUTION_API_URL', desc: 'URL da Evolution API', value: instanceInfo ? '✅ Configurada' : 'Não configurada' },
-              { key: 'EVOLUTION_API_KEY', desc: 'Chave de API da Evolution', value: instanceInfo ? '✅ Configurada' : 'Não configurada' },
-              { key: 'EVOLUTION_INSTANCE_NAME', desc: 'Nome da instância', value: instanceInfo?.instanceName || 'Não configurada' },
+              { key: 'EVOLUTION_API_URL', desc: 'URL da Evolution API', value: isUnconfigured ? 'Não configurada' : 'Configurada' },
+              { key: 'EVOLUTION_API_KEY', desc: 'Chave de API da Evolution', value: isUnconfigured ? 'Não configurada' : 'Configurada' },
+              { key: 'EVOLUTION_INSTANCE_NAME', desc: 'Nome da instância', value: connectionState?.instance || instanceInfo?.instanceName || 'zapvest' },
             ].map((envVar) => (
               <div key={envVar.key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <code className="text-sm font-mono font-medium text-gray-900">{envVar.key}</code>
                   <p className="text-xs text-gray-500 mt-0.5">{envVar.desc}</p>
                 </div>
-                <Badge variant={envVar.value.includes('✅') || envVar.value === instanceInfo?.instanceName ? 'success' : 'secondary'} className="font-mono text-xs">{envVar.value}</Badge>
+                <Badge variant={envVar.value === 'Não configurada' ? 'secondary' : 'success'} className="font-mono text-xs">{envVar.value}</Badge>
               </div>
             ))}
           </div>

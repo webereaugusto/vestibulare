@@ -10,69 +10,248 @@ interface DateEntry {
   eventDate: string;
   eventEndDate?: string;
   alertDaysBefore?: number[];
+  officialUrl?: string;
+  notes?: string;
 }
 
 const DATES_2026_2027: DateEntry[] = [
+  // Datas oficiais coletadas em fontes primárias (Inep, MEC, Comvest, FUVEST, VUNESP e UERJ)
+  // em 26/04/2026.
   // ========== ENEM 2026 ==========
-  { vestibularSlug: 'enem', eventType: 'inscricao', eventName: 'Início das Inscrições ENEM 2026', eventDate: '2026-05-25', eventEndDate: '2026-06-05', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'enem', eventType: 'inscricao', eventName: 'Fim das Inscrições ENEM 2026', eventDate: '2026-06-05', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'enem', eventType: 'prova', eventName: '1º Dia de Provas ENEM 2026', eventDate: '2026-11-01', alertDaysBefore: [1, 3, 7, 14, 30] },
-  { vestibularSlug: 'enem', eventType: 'prova', eventName: '2º Dia de Provas ENEM 2026', eventDate: '2026-11-08', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'enem', eventType: 'resultado', eventName: 'Divulgação dos Resultados ENEM 2026', eventDate: '2027-01-16', alertDaysBefore: [1, 3, 7] },
+  {
+    vestibularSlug: 'enem',
+    eventType: 'outro',
+    eventName: 'Justificativa de ausência / Solicitação de isenção ENEM 2026',
+    eventDate: '2026-04-13',
+    eventEndDate: '2026-04-24',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.gov.br/inep/pt-br/centrais-de-conteudo/noticias/enem/enem-2026-comeca-nesta-segunda-feira-13-de-abril-o-prazo-para-solicitar-a-isencao-da-taxa-de-inscricao',
+  },
+  {
+    vestibularSlug: 'enem',
+    eventType: 'inscricao',
+    eventName: 'Inscrições ENEM 2026',
+    eventDate: '2026-05-26',
+    eventEndDate: '2026-06-06',
+    alertDaysBefore: [1, 3, 7, 14],
+    officialUrl: 'https://www.gov.br/inep/pt-br/centrais-de-conteudo/noticias/enem/inscricoes-comecam-na-proxima-segunda-26',
+  },
+  {
+    vestibularSlug: 'enem',
+    eventType: 'prova',
+    eventName: '1º dia de provas ENEM 2026',
+    eventDate: '2026-11-09',
+    alertDaysBefore: [1, 3, 7, 14, 30],
+    officialUrl: 'https://www.gov.br/inep/pt-br/centrais-de-conteudo/noticias/enem/inscricoes-comecam-na-proxima-segunda-26',
+  },
+  {
+    vestibularSlug: 'enem',
+    eventType: 'prova',
+    eventName: '2º dia de provas ENEM 2026',
+    eventDate: '2026-11-16',
+    alertDaysBefore: [1, 3, 7, 14],
+    officialUrl: 'https://www.gov.br/inep/pt-br/centrais-de-conteudo/noticias/enem/inscricoes-comecam-na-proxima-segunda-26',
+  },
 
-  // ========== SiSU 2027 ==========
-  { vestibularSlug: 'sisu', eventType: 'inscricao', eventName: 'Início das Inscrições SiSU 2027', eventDate: '2027-01-19', eventEndDate: '2027-01-23', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'sisu', eventType: 'inscricao', eventName: 'Fim das Inscrições SiSU 2027', eventDate: '2027-01-23', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'sisu', eventType: 'resultado', eventName: 'Resultado Chamada Regular SiSU 2027', eventDate: '2027-01-29', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'sisu', eventType: 'matricula', eventName: 'Matrícula Chamada Regular SiSU 2027', eventDate: '2027-02-02', eventEndDate: '2027-02-06', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'sisu', eventType: 'outro', eventName: 'Manifestação Interesse Lista de Espera SiSU 2027', eventDate: '2027-02-11', alertDaysBefore: [1, 3] },
+  // ========== SiSU 2026 ==========
+  {
+    vestibularSlug: 'sisu',
+    eventType: 'inscricao',
+    eventName: 'Inscrições SiSU 2026',
+    eventDate: '2026-01-19',
+    eventEndDate: '2026-01-23',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.gov.br/mec/pt-br/assuntos/noticias/2026/janeiro/abertas-as-inscricoes-para-o-sisu-2026',
+  },
+  {
+    vestibularSlug: 'sisu',
+    eventType: 'resultado',
+    eventName: 'Resultado da chamada regular SiSU 2026',
+    eventDate: '2026-01-29',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.gov.br/mec/pt-br/assuntos/noticias/2026/janeiro/abertas-as-inscricoes-para-o-sisu-2026',
+  },
+  {
+    vestibularSlug: 'sisu',
+    eventType: 'outro',
+    eventName: 'Manifestação de interesse na lista de espera SiSU 2026 (até)',
+    eventDate: '2026-02-02',
+    alertDaysBefore: [1, 3],
+    officialUrl: 'https://www.gov.br/mec/pt-br/assuntos/noticias/2026/janeiro/sisu-2026-resultados-individuais-estao-disponiveis',
+  },
 
-  // ========== FUVEST 2027 ==========
-  { vestibularSlug: 'fuvest', eventType: 'outro', eventName: 'Início Solicitação Isenção/Redução FUVEST 2027', eventDate: '2026-05-12', eventEndDate: '2026-07-10', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'fuvest', eventType: 'inscricao', eventName: 'Início das Inscrições FUVEST 2027', eventDate: '2026-08-17', eventEndDate: '2026-10-06', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'fuvest', eventType: 'inscricao', eventName: 'Fim das Inscrições FUVEST 2027', eventDate: '2026-10-06', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'fuvest', eventType: 'prova', eventName: '1ª Fase FUVEST 2027', eventDate: '2026-11-22', alertDaysBefore: [1, 3, 7, 14, 30] },
-  { vestibularSlug: 'fuvest', eventType: 'prova', eventName: '2ª Fase FUVEST 2027 - 1º Dia', eventDate: '2026-12-13', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'fuvest', eventType: 'prova', eventName: '2ª Fase FUVEST 2027 - 2º Dia', eventDate: '2026-12-14', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'fuvest', eventType: 'resultado', eventName: 'Resultado 1ª Chamada FUVEST 2027', eventDate: '2027-01-22', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'fuvest', eventType: 'matricula', eventName: 'Matrícula 1ª Chamada FUVEST 2027', eventDate: '2027-01-25', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'fuvest', eventType: 'segunda_chamada', eventName: 'Resultado 2ª Chamada FUVEST 2027', eventDate: '2027-02-09', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'fuvest', eventType: 'segunda_chamada', eventName: 'Resultado 3ª Chamada FUVEST 2027', eventDate: '2027-02-23', alertDaysBefore: [1, 3] },
+  // ========== FUVEST 2026 ==========
+  {
+    vestibularSlug: 'fuvest',
+    eventType: 'inscricao',
+    eventName: 'Inscrições FUVEST 2026',
+    eventDate: '2025-08-18',
+    eventEndDate: '2025-10-07',
+    alertDaysBefore: [1, 3, 7, 14],
+    officialUrl: 'https://www.fuvest.br/fuvest-2026-fuvest-divulga-cronograma-para-vestibular-2026/',
+  },
+  {
+    vestibularSlug: 'fuvest',
+    eventType: 'prova',
+    eventName: '1ª fase FUVEST 2026',
+    eventDate: '2025-11-23',
+    alertDaysBefore: [1, 3, 7, 14, 30],
+    officialUrl: 'https://www.fuvest.br/fuvest-2026-fuvest-divulga-cronograma-para-vestibular-2026/',
+  },
+  {
+    vestibularSlug: 'fuvest',
+    eventType: 'prova',
+    eventName: '2ª fase FUVEST 2026 - 1º dia',
+    eventDate: '2025-12-14',
+    alertDaysBefore: [1, 3, 7, 14],
+    officialUrl: 'https://www.fuvest.br/fuvest-2026-fuvest-divulga-cronograma-para-vestibular-2026/',
+  },
+  {
+    vestibularSlug: 'fuvest',
+    eventType: 'prova',
+    eventName: '2ª fase FUVEST 2026 - 2º dia',
+    eventDate: '2025-12-15',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.fuvest.br/fuvest-2026-fuvest-divulga-cronograma-para-vestibular-2026/',
+  },
+  {
+    vestibularSlug: 'fuvest',
+    eventType: 'resultado',
+    eventName: 'Divulgação da 1ª chamada FUVEST 2026',
+    eventDate: '2026-01-23',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.fuvest.br/fuvest-2026-fuvest-divulga-cronograma-para-vestibular-2026/',
+  },
 
   // ========== UNICAMP 2027 ==========
-  { vestibularSlug: 'unicamp', eventType: 'outro', eventName: 'Início Solicitação Isenção UNICAMP 2027', eventDate: '2026-05-13', eventEndDate: '2026-06-21', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'unicamp', eventType: 'inscricao', eventName: 'Início das Inscrições UNICAMP 2027', eventDate: '2026-08-03', eventEndDate: '2026-08-31', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'unicamp', eventType: 'inscricao', eventName: 'Fim das Inscrições UNICAMP 2027', eventDate: '2026-08-31', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'unicamp', eventType: 'prova', eventName: '1ª Fase UNICAMP 2027', eventDate: '2026-10-18', alertDaysBefore: [1, 3, 7, 14, 30] },
-  { vestibularSlug: 'unicamp', eventType: 'prova', eventName: '2ª Fase UNICAMP 2027 - 1º Dia', eventDate: '2026-12-06', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'unicamp', eventType: 'prova', eventName: '2ª Fase UNICAMP 2027 - 2º Dia', eventDate: '2026-12-07', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'unicamp', eventType: 'resultado', eventName: 'Resultado 1ª Chamada UNICAMP 2027', eventDate: '2027-01-24', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'unicamp', eventType: 'matricula', eventName: 'Matrícula 1ª Chamada UNICAMP 2027', eventDate: '2027-01-25', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'unicamp', eventType: 'segunda_chamada', eventName: 'Resultado 2ª Chamada UNICAMP 2027', eventDate: '2027-02-10', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'unicamp', eventType: 'segunda_chamada', eventName: 'Resultado 3ª Chamada UNICAMP 2027', eventDate: '2027-02-20', alertDaysBefore: [1, 3] },
+  {
+    vestibularSlug: 'unicamp',
+    eventType: 'outro',
+    eventName: 'Solicitação de isenção UNICAMP 2027',
+    eventDate: '2026-05-11',
+    eventEndDate: '2026-06-05',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.unicamp.br/noticias/2026/03/30/unicamp-divulga-datas-do-vestibular-2027-inscricoes-serao-realizadas-de-3-a-31-de-agosto/',
+  },
+  {
+    vestibularSlug: 'unicamp',
+    eventType: 'outro',
+    eventName: 'Divulgação da lista de beneficiados pela isenção UNICAMP 2027',
+    eventDate: '2026-07-31',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.unicamp.br/noticias/2026/03/30/unicamp-divulga-datas-do-vestibular-2027-inscricoes-serao-realizadas-de-3-a-31-de-agosto/',
+  },
+  {
+    vestibularSlug: 'unicamp',
+    eventType: 'inscricao',
+    eventName: 'Inscrições UNICAMP 2027',
+    eventDate: '2026-08-03',
+    eventEndDate: '2026-08-31',
+    alertDaysBefore: [1, 3, 7, 14],
+    officialUrl: 'https://www.unicamp.br/noticias/2026/03/30/unicamp-divulga-datas-do-vestibular-2027-inscricoes-serao-realizadas-de-3-a-31-de-agosto/',
+  },
+  {
+    vestibularSlug: 'unicamp',
+    eventType: 'prova',
+    eventName: '1ª fase UNICAMP 2027',
+    eventDate: '2026-10-18',
+    alertDaysBefore: [1, 3, 7, 14, 30],
+    officialUrl: 'https://www.unicamp.br/noticias/2026/03/30/unicamp-divulga-datas-do-vestibular-2027-inscricoes-serao-realizadas-de-3-a-31-de-agosto/',
+  },
+  {
+    vestibularSlug: 'unicamp',
+    eventType: 'prova',
+    eventName: '2ª fase UNICAMP 2027 - 1º dia',
+    eventDate: '2026-11-29',
+    alertDaysBefore: [1, 3, 7, 14],
+    officialUrl: 'https://www.unicamp.br/noticias/2026/03/30/unicamp-divulga-datas-do-vestibular-2027-inscricoes-serao-realizadas-de-3-a-31-de-agosto/',
+  },
+  {
+    vestibularSlug: 'unicamp',
+    eventType: 'prova',
+    eventName: '2ª fase UNICAMP 2027 - 2º dia',
+    eventDate: '2026-11-30',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.unicamp.br/noticias/2026/03/30/unicamp-divulga-datas-do-vestibular-2027-inscricoes-serao-realizadas-de-3-a-31-de-agosto/',
+  },
+  {
+    vestibularSlug: 'unicamp',
+    eventType: 'resultado',
+    eventName: 'Divulgação da 1ª lista de aprovados UNICAMP 2027',
+    eventDate: '2027-01-25',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.unicamp.br/noticias/2026/03/30/unicamp-divulga-datas-do-vestibular-2027-inscricoes-serao-realizadas-de-3-a-31-de-agosto/',
+  },
+  {
+    vestibularSlug: 'unicamp',
+    eventType: 'matricula',
+    eventName: 'Matrícula online da 1ª lista UNICAMP 2027',
+    eventDate: '2027-01-26',
+    eventEndDate: '2027-01-27',
+    alertDaysBefore: [1, 3],
+    officialUrl: 'https://www.unicamp.br/noticias/2026/03/30/unicamp-divulga-datas-do-vestibular-2027-inscricoes-serao-realizadas-de-3-a-31-de-agosto/',
+  },
 
-  // ========== UNESP 2027 ==========
-  { vestibularSlug: 'unesp', eventType: 'outro', eventName: 'Início Solicitação Isenção/Redução UNESP 2027', eventDate: '2026-08-26', eventEndDate: '2026-09-01', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'unesp', eventType: 'inscricao', eventName: 'Início das Inscrições UNESP 2027', eventDate: '2026-09-07', eventEndDate: '2026-10-13', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'unesp', eventType: 'inscricao', eventName: 'Fim das Inscrições UNESP 2027', eventDate: '2026-10-13', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'unesp', eventType: 'prova', eventName: '1ª Fase UNESP 2027', eventDate: '2026-11-15', alertDaysBefore: [1, 3, 7, 14, 30] },
-  { vestibularSlug: 'unesp', eventType: 'prova', eventName: '2ª Fase UNESP 2027 - 1º Dia', eventDate: '2026-12-13', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'unesp', eventType: 'prova', eventName: '2ª Fase UNESP 2027 - 2º Dia', eventDate: '2026-12-14', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'unesp', eventType: 'resultado', eventName: 'Resultado 1ª Chamada UNESP 2027', eventDate: '2027-01-31', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'unesp', eventType: 'matricula', eventName: 'Matrícula 1ª Chamada UNESP 2027', eventDate: '2027-02-01', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'unesp', eventType: 'segunda_chamada', eventName: 'Resultado 2ª Chamada UNESP 2027', eventDate: '2027-02-11', alertDaysBefore: [1, 3] },
-  { vestibularSlug: 'unesp', eventType: 'segunda_chamada', eventName: 'Resultado 3ª Chamada UNESP 2027', eventDate: '2027-02-21', alertDaysBefore: [1, 3] },
+  // ========== UNESP (meio de ano) 2026 ==========
+  {
+    vestibularSlug: 'unesp',
+    eventType: 'inscricao',
+    eventName: 'Inscrições UNESP Meio de Ano 2026',
+    eventDate: '2026-04-13',
+    eventEndDate: '2026-05-05',
+    alertDaysBefore: [1, 3, 7, 14],
+    officialUrl: 'https://www.vunesp.com.br/VNSP2513',
+  },
+  {
+    vestibularSlug: 'unesp',
+    eventType: 'prova',
+    eventName: '1ª fase UNESP Meio de Ano 2026',
+    eventDate: '2026-05-24',
+    alertDaysBefore: [1, 3, 7, 14],
+    officialUrl: 'https://www.vunesp.com.br/VNSP2513',
+  },
+  {
+    vestibularSlug: 'unesp',
+    eventType: 'prova',
+    eventName: '2ª fase UNESP Meio de Ano 2026 - 1º dia',
+    eventDate: '2026-06-20',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.vunesp.com.br/VNSP2513',
+  },
+  {
+    vestibularSlug: 'unesp',
+    eventType: 'prova',
+    eventName: '2ª fase UNESP Meio de Ano 2026 - 2º dia',
+    eventDate: '2026-06-21',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.vunesp.com.br/VNSP2513',
+  },
 
-  // ========== UERJ 2027 ==========
-  { vestibularSlug: 'uerj', eventType: 'outro', eventName: 'Início Solicitação Isenção 1º EQ UERJ 2027', eventDate: '2026-03-15', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'uerj', eventType: 'inscricao', eventName: 'Início Inscrições 1º EQ UERJ 2027', eventDate: '2026-04-15', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'uerj', eventType: 'prova', eventName: '1º Exame de Qualificação UERJ 2027', eventDate: '2026-06-14', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'uerj', eventType: 'outro', eventName: 'Início Solicitação Isenção 2º EQ UERJ 2027', eventDate: '2026-06-15', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'uerj', eventType: 'inscricao', eventName: 'Início Inscrições 2º EQ UERJ 2027', eventDate: '2026-07-15', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'uerj', eventType: 'prova', eventName: '2º Exame de Qualificação UERJ 2027', eventDate: '2026-08-30', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'uerj', eventType: 'inscricao', eventName: 'Início Inscrições Exame Discursivo UERJ 2027', eventDate: '2026-09-15', alertDaysBefore: [1, 3, 7] },
-  { vestibularSlug: 'uerj', eventType: 'prova', eventName: 'Exame Discursivo UERJ 2027', eventDate: '2026-11-29', alertDaysBefore: [1, 3, 7, 14] },
-  { vestibularSlug: 'uerj', eventType: 'resultado', eventName: 'Resultado Final UERJ 2027', eventDate: '2027-01-25', alertDaysBefore: [1, 3, 7] },
+  // ========== UERJ 2027 (datas publicadas para o 1º EQ) ==========
+  {
+    vestibularSlug: 'uerj',
+    eventType: 'inscricao',
+    eventName: 'Prazo final de inscrição - 1º Exame de Qualificação UERJ 2027',
+    eventDate: '2026-05-06',
+    alertDaysBefore: [1, 3, 7],
+    officialUrl: 'https://www.uerj.br/noticia/vestibular-uerj-2027-inscricoes-para-1o-exame-de-qualificacao-vao-ate-6-5-prova-sera-aplicada-em-junho/',
+  },
+  {
+    vestibularSlug: 'uerj',
+    eventType: 'outro',
+    eventName: 'Prazo final para pagamento da taxa - 1º EQ UERJ 2027',
+    eventDate: '2026-05-07',
+    alertDaysBefore: [1, 3],
+    officialUrl: 'https://www.uerj.br/noticia/vestibular-uerj-2027-inscricoes-para-1o-exame-de-qualificacao-vao-ate-6-5-prova-sera-aplicada-em-junho/',
+  },
+  {
+    vestibularSlug: 'uerj',
+    eventType: 'prova',
+    eventName: '1º Exame de Qualificação UERJ 2027',
+    eventDate: '2026-06-07',
+    alertDaysBefore: [1, 3, 7, 14],
+    officialUrl: 'https://www.uerj.br/noticia/vestibular-uerj-2027-inscricoes-para-1o-exame-de-qualificacao-vao-ate-6-5-prova-sera-aplicada-em-junho/',
+  },
 ];
 
 export async function POST() {
@@ -94,6 +273,11 @@ export async function POST() {
     }
 
     const slugToId = new Map(vestibulares.map((v) => [v.slug, v.id]));
+    // O usuário solicitou limpar todas as datas existentes antes de inserir o novo calendário.
+    await supabase
+      .from('important_dates')
+      .delete()
+      .not('id', 'is', null);
 
     let inserted = 0;
     let skipped = 0;
@@ -116,6 +300,8 @@ export async function POST() {
             event_name: entry.eventName,
             event_date: entry.eventDate,
             event_end_date: entry.eventEndDate || null,
+            official_url: entry.officialUrl || null,
+            notes: entry.notes || null,
             alert_days_before: entry.alertDaysBefore || [1, 3, 7],
             source: 'manual',
           },
@@ -135,6 +321,8 @@ export async function POST() {
             event_name: entry.eventName,
             event_date: entry.eventDate,
             event_end_date: entry.eventEndDate || null,
+            official_url: entry.officialUrl || null,
+            notes: entry.notes || null,
             alert_days_before: entry.alertDaysBefore || [1, 3, 7],
             source: 'manual',
           });
