@@ -1,5 +1,5 @@
 export type PlanType = 'free' | 'basic' | 'premium';
-export type EventType = 'inscricao' | 'prova' | 'resultado' | 'segunda_chamada' | 'recurso' | 'matricula' | 'outro';
+export type EventType = 'inscricao' | 'prova' | 'resultado' | 'segunda_chamada' | 'recurso' | 'matricula' | 'isencao_taxa' | 'outro';
 export type AlertChannel = 'email' | 'sms' | 'whatsapp';
 export type AlertStatus = 'sent' | 'failed' | 'pending';
 export type SubscriptionStatus = 'pending' | 'approved' | 'rejected' | 'refunded';

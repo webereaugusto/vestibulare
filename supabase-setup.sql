@@ -33,7 +33,7 @@ create table if not exists vestibulares (
 create table if not exists important_dates (
   id uuid primary key default gen_random_uuid(),
   vestibular_id uuid references vestibulares(id) on delete cascade,
-  event_type text not null check (event_type in ('inscricao', 'prova', 'resultado', 'segunda_chamada', 'recurso', 'matricula', 'outro')),
+  event_type text not null check (event_type in ('inscricao', 'prova', 'resultado', 'segunda_chamada', 'recurso', 'matricula', 'isencao_taxa', 'outro')),
   event_name text not null,
   event_date date not null,
   event_end_date date, -- Para períodos (ex: inscrição de X a Y)

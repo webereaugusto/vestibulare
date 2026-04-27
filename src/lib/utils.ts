@@ -13,6 +13,7 @@ export function formatEventType(type: string): string {
     segunda_chamada: 'Segunda Chamada',
     recurso: 'Recurso',
     matricula: 'Matrícula',
+    isencao_taxa: 'Isenção de Taxa',
     outro: 'Outro',
   };
   return labels[type] || type;

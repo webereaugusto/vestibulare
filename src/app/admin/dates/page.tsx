@@ -21,6 +21,7 @@ const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'segunda_chamada', label: 'Segunda Chamada' },
   { value: 'recurso', label: 'Recurso' },
   { value: 'matricula', label: 'Matrícula' },
+  { value: 'isencao_taxa', label: 'Isenção de Taxa' },
   { value: 'outro', label: 'Outro' },
 ];
 
