@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,15 +13,10 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const supabase = useMemo(() => createBrowserClient(), []);
+  const supabase = createBrowserClient();
 
   function getResetRedirectUrl() {
-    const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '');
-    const origin = configuredUrl && !configuredUrl.includes('localhost')
-      ? configuredUrl
-      : window.location.origin;
-
-    return `${origin}/auth/reset-password`;
+    return `${window.location.origin}/auth/reset-password`;
   }
 
   async function handleSubmit(e: React.FormEvent) {
